@@ -1,8 +1,9 @@
 import os
 import sys
 import requests
-import argparse
 
+import argparse
+import colorama
 from pytube import YouTube, Playlist
 from mutagen.mp4 import MP4, MP4Cover
 
@@ -197,6 +198,7 @@ class Downloader:
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
     print("Initialising.")
+    colorama.init()
     urls = Playlist(args.url)
     playlist_title = urls.title()
 
