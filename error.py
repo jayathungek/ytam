@@ -31,11 +31,12 @@ class BadTitleFormatError(Error):
 
 class InvalidPlaylistIndexError(Error):
     def __init__(self, index, title):
-        self.message = f"STA index {index} is out of range for playlist {title}."
+        self.message = f"Start index {index} is out of range for playlist {title}."
+
 
 class IndicesOutOfOrderError(Error):
     def __init__(self):
-        self.message = f"END index must be greater that STA index."
+        self.message = f"End index must be greater that start index."
 
 
 class InvalidFieldError(Error):
