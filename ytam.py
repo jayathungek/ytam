@@ -22,6 +22,14 @@ def make_safe_filename(string):
     return "".join(safe_char(c) for c in string).rstrip("_")
 
 
+def is_affirmative(string):
+    string = string.strip().lower()
+    string = string.split(" ")[0]
+    truthy = ["y", "yes", "true", "1", "t"]
+
+    return string in truthy
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -119,7 +127,6 @@ class Downloader:
         filename = outdir + f"album_art_{str(index)}.jpg"
         with open(filename, "wb",) as f:
             f.write(thumbnail_image.content)
-
         return filename
 
     def download(self):
@@ -149,7 +156,7 @@ class Downloader:
             except:
                 self.retry_urls.append(url)
                 print(
-                    f"Downloading {font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]  ')}"
+                    f"Downloading {font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]  ')}\n"
                 )
                 continue
 
@@ -186,13 +193,19 @@ class Downloader:
                     track_artist,
                     self.image_filepath,
                 )
-                print(f"└── Applying metadata - {font.apply('bl', '[Done]')}")
+                print(f"└── Applying metadata - {font.apply('bl', '[Done]')}\n")
 
             except:
-                print(f"└── Applying metadata - {font.apply('bf', '[Failed]')}")
+                print(f"└── Applying metadata - {font.apply('bf', '[Failed]')}\n")
 
         for image in self.images:
             os.remove(image)
+        self.images = []
+
+    def set_retries(self):
+        self.album_image_set = False
+        self.urls = self.retry_urls
+        self.retry_urls = []
 
 
 if __name__ == "__main__":
@@ -215,13 +228,27 @@ if __name__ == "__main__":
         if end < start:
             raise error.IndicesOutOfOrderError()
 
-        print(
-            f"Downloading songs {font.apply('gb', start)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
-        )
+        downloading_message = f"Downloading songs {font.apply('gb', start)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
+        text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
+        print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
         d = Downloader(urls[start:end], album, directory, artist, is_album, args.titles)
-        d.download()
 
-        print(f"{d.successful}/{len(urls[start:end])} downloaded successfully.")
+        retry = True
+        while retry:
+            d.download()
+            print(f"{font.apply('gb', '─'*text_len)}")
+            print(f"{d.successful}/{len(urls[start:end])} downloaded successfully.\n")
+            if len(d.retry_urls) > 0:
+                d.set_retries()
+                user = input(f"Retry {font.apply('fb', str(len(d.urls)) + ' failed')} downloads? Y/N ")
+                if not is_affirmative(user):
+                    retry = False
+                else:
+                    print("\nRetrying.")
+                    print(f"{font.apply('gb', '─'*len('Retrying.'))}")
+            else:
+                retry = False
+
     except (
         error.InvalidPlaylistIndexError,
         error.IndicesOutOfOrderError,
