@@ -1,5 +1,6 @@
 import os
 import sys
+from sys import stdout
 import requests
 
 import argparse
@@ -103,8 +104,9 @@ class Downloader:
         progress = (
             f"Downloading {font.apply('gb', title)} - [{p:.2f}%]"
             if p < 100
-            else f"Downloading {font.apply('gb', title)} - {font.apply('bl', '[Done]  ')}"
+            else f"Downloading {font.apply('gb', title)} - {font.apply('bl', '[Done]          ')}"
         )
+
         end = "\n" if p == 100 else "\r"
         print(progress, end=end, flush=True)
 
@@ -156,7 +158,7 @@ class Downloader:
             except:
                 self.retry_urls.append(url)
                 print(
-                    f"Downloading {font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]  ')}\n"
+                    f"Downloading {font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]         ')}\n"
                 )
                 continue
 
@@ -256,3 +258,7 @@ if __name__ == "__main__":
         error.BadTitleFormatError,
     ) as e:
         print(f"Error: {e.message}")
+
+
+# Downloading Lorde - Tennis Court - [100.0%]
+# Downloading Lorde - Tennis Court - [Done]
