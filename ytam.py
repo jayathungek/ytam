@@ -22,6 +22,11 @@ def make_safe_filename(string):
 
     return "".join(safe_char(c) for c in string).rstrip("_")
 
+def check_positive(value):
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
+    return ivalue
 
 def is_affirmative(string):
     string = string.strip().lower()
@@ -52,14 +57,14 @@ def parse_args(args):
     parser.add_argument(
         "-s",
         "--start",
-        type=int,
-        help="from which position in the playlist to start downloading (indexed from, and defaults to 0)",
+        type=check_positive,
+        help="from which position in the playlist to start downloading",
     )
     parser.add_argument(
         "-e",
         "--end",
-        type=int,
-        help="position in the playlist of the last song to be downloaded (indexed from 0, and defaults to -1)",
+        type=check_positive,
+        help="position in the playlist of the last song to be downloaded",
     )
     parser.add_argument(
         "-A",
@@ -85,8 +90,11 @@ class Downloader:
     image_filepath = None
     metadata_filepath = None
     successful = 0
+    cur_song = 1
     successful_filepaths = []
     retry_urls = []
+
+    start = None
 
     def __init__(self, urls, album, outdir, artist, is_album=True, metadata=None):
         self.urls = urls
@@ -102,12 +110,13 @@ class Downloader:
         size = self.cur_video.filesize
         p = ((size - bytes_remaining) * 100.0) / size
         progress = (
-            f"Downloading {font.apply('gb', title)} - [{p:.2f}%]"
+            f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} - [{p:.2f}%]"
             if p < 100
-            else f"Downloading {font.apply('gb', title)} - {font.apply('bl', '[Done]          ')}"
+            else f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} - {font.apply('bl', '[Done]          ')}"
         )
 
         end = "\n" if p == 100 else "\r"
+
         print(progress, end=end, flush=True)
 
     def apply_metadata(
@@ -139,16 +148,26 @@ class Downloader:
             metadata = tg.get_titles()
 
         for num, url in enumerate(self.urls):
-            yt = YouTube(url)
-            yt.register_on_progress_callback(self.progress_function)
-            self.cur_video = (
-                yt.streams.filter(type="audio", subtype="mp4")
-                .order_by("abr")
-                .desc()
-                .first()
-            )
+            yt = None
+            self.cur_song = num+self.start+1
+            try:
+                yt = YouTube(url)
+            except:
+                self.retry_urls.append(url)
+                print(
+                    f"Downloading song {font.apply('gb', str(self.cur_song))} - {font.apply('bf', '[Failed]         ')}\n"
+                )
+                continue
+
             path = None
             try:
+                yt.register_on_progress_callback(self.progress_function)
+                self.cur_video = (
+                    yt.streams.filter(type="audio", subtype="mp4")
+                    .order_by("abr")
+                    .desc()
+                    .first()
+                )
                 path = self.cur_video.download(
                     output_path=self.outdir,
                     filename=make_safe_filename(self.cur_video.title),
@@ -158,7 +177,7 @@ class Downloader:
             except:
                 self.retry_urls.append(url)
                 print(
-                    f"Downloading {font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]         ')}\n"
+                    f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]         ')}\n"
                 )
                 continue
 
@@ -217,7 +236,7 @@ if __name__ == "__main__":
     urls = Playlist(args.url)
     playlist_title = urls.title()
 
-    start = 0 if args.start is None else args.start
+    start = 0 if args.start is None else args.start - 1
     end = len(urls) if args.end is None else args.end
     album = playlist_title if args.album is None else args.album
     directory = "music/" if args.directory is None else args.directory
@@ -230,10 +249,11 @@ if __name__ == "__main__":
         if end < start:
             raise error.IndicesOutOfOrderError()
 
-        downloading_message = f"Downloading songs {font.apply('gb', start)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
+        downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
         text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
         d = Downloader(urls[start:end], album, directory, artist, is_album, args.titles)
+        d.start = start
 
         retry = True
         while retry:
