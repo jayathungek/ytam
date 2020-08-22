@@ -78,6 +78,12 @@ def parse_args(args):
         type=str,
         help="the name of the artist that performed the songs in the playlist (defaults to Unknown)",
     )
+    parser.add_argument(
+        "-i",
+        "--image",
+        type=str,
+        help="the path to the image to be used as the album cover (defaults to using the thumbnail of the first video in the playlist). Only works when -A flag is set",
+    )
     return parser.parse_args(args)
 
 
@@ -96,14 +102,16 @@ class Downloader:
 
     start = None
 
-    def __init__(self, urls, album, outdir, artist, is_album=True, metadata=None):
+    def __init__(self, urls, album, outdir, artist, is_album, metadata, image_filepath):
         self.urls = urls
         self.album = album
         self.is_album = is_album
         self.outdir = outdir
         self.artist = artist
         self.metadata_filepath = metadata
+        self.image_filepath = image_filepath
         self.images = []
+
 
     def progress_function(self, chunk, file_handle, bytes_remaining):
         title = self.cur_video.title
@@ -133,7 +141,7 @@ class Downloader:
         song.save()
 
     @staticmethod
-    def write_image(url, index, outdir):
+    def download_image(url, index, outdir):
         thumbnail_image = requests.get(url)
         filename = outdir + f"album_art_{str(index)}.jpg"
         with open(filename, "wb",) as f:
@@ -182,15 +190,16 @@ class Downloader:
                 continue
 
             if self.is_album:
-                if not self.album_image_set:
-                    image_path = Downloader.write_image(
-                        yt.thumbnail_url, num, self.outdir
-                    )
-                    self.images.append(image_path)
-                    self.image_filepath = image_path
-                    self.album_image_set = True
+                if self.image_filepath is None:
+                    if not self.album_image_set:
+                        image_path = Downloader.download_image(
+                            yt.thumbnail_url, num, self.outdir
+                        )
+                        self.images.append(image_path)
+                        self.image_filepath = image_path
+                        self.album_image_set = True
             else:
-                image_path = Downloader.write_image(yt.thumbnail_url, num, self.outdir)
+                image_path = Downloader.download_image(yt.thumbnail_url, num, self.outdir)
                 self.images.append(image_path)
                 self.image_filepath = image_path
 
@@ -241,7 +250,7 @@ if __name__ == "__main__":
     album = playlist_title if args.album is None else args.album
     directory = "music/" if args.directory is None else args.directory
     artist = "Unknown" if args.artist is None else args.artist
-    is_album = False if args.album is None else True
+    is_album = False if args.album is None else True 
 
     try:
         if start >= len(urls):
@@ -252,7 +261,7 @@ if __name__ == "__main__":
         downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
         text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
-        d = Downloader(urls[start:end], album, directory, artist, is_album, args.titles)
+        d = Downloader(urls[start:end], album, directory, artist, is_album, args.titles, args.image)
         d.start = start
 
         retry = True
