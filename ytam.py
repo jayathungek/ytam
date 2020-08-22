@@ -287,7 +287,3 @@ if __name__ == "__main__":
         error.BadTitleFormatError,
     ) as e:
         print(f"Error: {e.message}")
-
-
-# Downloading Lorde - Tennis Court - [100.0%]
-# Downloading Lorde - Tennis Court - [Done]
