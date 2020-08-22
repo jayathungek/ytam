@@ -228,9 +228,6 @@ class Downloader:
             except:
                 print(f"└── Applying metadata - {font.apply('bf', '[Failed]')}\n")
 
-        for image in self.images:
-            os.remove(image)
-        self.images = []
 
     def set_retries(self):
         self.album_image_set = False
@@ -279,6 +276,10 @@ if __name__ == "__main__":
                     print(f"{font.apply('gb', '─'*len('Retrying.'))}")
             else:
                 retry = False
+
+        for image in d.images:
+            os.remove(image)
+        d.images = []
 
     except (
         error.InvalidPlaylistIndexError,
