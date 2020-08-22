@@ -1,0 +1,9 @@
+certifi==2020.6.20
+chardet==3.0.4
+colorama==0.4.3
+idna==2.10
+mutagen==1.45.1
+pytube3 @ git+git://github.com/nficano/pytube.git@0f32241c89192b22de9cfbfee1303a1bcee18bd3
+requests==2.24.0
+typing-extensions==3.7.4.2
+urllib3==1.25.10
