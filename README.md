@@ -15,17 +15,22 @@ These instructions will get you a copy of the project up and running on your loc
 ``` -->
 
 ### Installing
-
-Install required packages from ```requirements.txt```:
+ytam depends on a specific patch of pytube, which is not yet incorporated into its official release. Until this happens, first install the patch using:
 
 ```
-pip install -r requirements.txt
+pip install git+git://github.com/nficano/pytube.git@0f32241c89192b22de9cfbfee1303a1bcee18bd3
+```
+
+Then:
+
+```
+pip install ytam
 ```
 
 Usage:
 
 ```
-python ytam.py [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
+ytam [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
                [-a ARTIST] [-i IMAGE]
                URL
 

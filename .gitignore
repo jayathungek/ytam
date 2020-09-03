@@ -2,6 +2,7 @@
 *.sublime-project
 *.sublime-workspace
 *.pyc
+*TOKEN
 videos.txt
 titles.txt
 __pycache__/

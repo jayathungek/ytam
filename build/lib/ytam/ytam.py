@@ -36,9 +36,8 @@ class Downloader:
 
     start = None
 
-    def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies):
+    def __init__(self, urls, album, outdir, artist, is_album, metadata, image_filepath):
         self.urls = urls
-        self.total_songs = total_songs
         self.album = album
         self.is_album = is_album
         self.outdir = outdir
@@ -46,7 +45,6 @@ class Downloader:
         self.metadata_filepath = metadata
         self.image_filepath = image_filepath
         self.images = []
-        self.proxies = proxies
 
 
     def progress_function(self, chunk, file_handle, bytes_remaining):
@@ -91,19 +89,15 @@ class Downloader:
             tg.make_titles()
             metadata = tg.get_titles()
 
-        for num, url in self.urls:
+        for num, url in enumerate(self.urls):
             yt = None
             self.cur_song = num+self.start+1
             try:
-                if self.proxies is not None:
-                    yt = YouTube(url, proxies=self.proxies)
-                else:
-                    yt = YouTube(url)
-
-            except Exception as e:
+                yt = YouTube(url)
+            except:
                 self.retry_urls.append(url)
                 print(
-                    f"Downloading song {font.apply('gb', str(self.cur_song))} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
+                    f"Downloading song {font.apply('gb', str(self.cur_song))} - {font.apply('bf', '[Failed]         ')}\n"
                 )
                 continue
 
@@ -116,7 +110,6 @@ class Downloader:
                     .desc()
                     .first()
                 )
-                
                 path = self.cur_video.download(
                     output_path=self.outdir,
                     filename=make_safe_filename(self.cur_video.title),
@@ -124,9 +117,9 @@ class Downloader:
                 self.successful_filepaths.append(path)
                 self.successful += 1
             except Exception as e:
-                self.retry_urls.append((num, url))
+                self.retry_urls.append(url)
                 print(
-                    f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
+                    f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed]         ')}\n"
                 )
 
                 continue
@@ -158,7 +151,7 @@ class Downloader:
             try:
                 self.apply_metadata(
                     num + 1,
-                    self.total_songs,
+                    len(self.urls),
                     path,
                     self.album,
                     track_title,
@@ -167,11 +160,66 @@ class Downloader:
                 )
                 print(f"└── Applying metadata - {font.apply('bl', '[Done]')}\n")
 
-            except Exception as e:
-                print(f"└── Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n")
+            except:
+                print(f"└── Applying metadata - {font.apply('bf', '[Failed]')}\n")
 
 
     def set_retries(self):
         self.album_image_set = False
         self.urls = self.retry_urls
         self.retry_urls = []
+
+
+# if __name__ == "__main__":
+#     args = parse_args(sys.argv[1:])
+#     print("Initialising.")
+#     colorama.init()
+#     urls = Playlist(args.url)
+#     playlist_title = urls.title()
+
+#     start = 0 if args.start is None else args.start - 1
+#     end = len(urls) if args.end is None else args.end
+#     album = playlist_title if args.album is None else args.album
+#     directory = "music/" if args.directory is None else args.directory
+#     artist = "Unknown" if args.artist is None else args.artist
+#     is_album = False if args.album is None else True 
+
+#     try:
+#         if start >= len(urls):
+#             raise error.InvalidPlaylistIndexError(start, playlist_title)
+#         if end < start:
+#             raise error.IndicesOutOfOrderError()
+
+#         downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
+#         text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
+#         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
+#         d = Downloader(urls[start:end], album, directory, artist, is_album, args.titles, args.image)
+#         d.start = start
+
+#         retry = True
+#         while retry:
+#             d.download()
+#             print(f"{font.apply('gb', '─'*text_len)}")
+#             print(f"{d.successful}/{len(urls[start:end])} downloaded successfully.\n")
+#             if len(d.retry_urls) > 0:
+#                 d.set_retries()
+#                 user = input(f"Retry {font.apply('fb', str(len(d.urls)) + ' failed')} downloads? Y/N ")
+#                 if not is_affirmative(user):
+#                     retry = False
+#                 else:
+#                     print("\nRetrying.")
+#                     print(f"{font.apply('gb', '─'*len('Retrying.'))}")
+#             else:
+#                 retry = False
+
+#         for image in d.images:
+#             os.remove(image)
+#         d.images = []
+
+#     except (
+#         error.InvalidPlaylistIndexError,
+#         error.IndicesOutOfOrderError,
+#         error.TitlesNotFoundError,
+#         error.BadTitleFormatError,
+#     ) as e:
+#         print(f"Error: {e.message}")
