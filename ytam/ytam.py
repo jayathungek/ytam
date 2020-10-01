@@ -1,4 +1,5 @@
 import requests
+import os 
 
 from pytube import YouTube, Playlist
 from mutagen.mp4 import MP4, MP4Cover
@@ -20,6 +21,9 @@ def make_safe_filename(string):
 
     return "".join(safe_char(c) for c in string).rstrip("_")
 
+def extract_title(string):
+    return string.split(".")[0]
+
 
 class Downloader:
     is_album = None
@@ -33,7 +37,6 @@ class Downloader:
     cur_song = 1
     successful_filepaths = []
     retry_urls = []
-
     start = None
 
     def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies):
@@ -117,9 +120,10 @@ class Downloader:
                     .first()
                 )
                 
+                safe_name = extract_title(make_safe_filename(self.cur_video.title))
                 path = self.cur_video.download(
                     output_path=self.outdir,
-                    filename=make_safe_filename(self.cur_video.title),
+                    filename=safe_name,
                 )
                 self.successful_filepaths.append(path)
                 self.successful += 1
@@ -169,6 +173,12 @@ class Downloader:
 
             except Exception as e:
                 print(f"└── Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n")
+
+            # "Convert" to mp3 lol
+            os.rename(path, f"{extract_title(path)}.mp3")
+
+
+
 
 
     def set_retries(self):
