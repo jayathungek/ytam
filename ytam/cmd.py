@@ -98,7 +98,7 @@ def main():
     album = playlist_title if args.album is None else args.album
     directory = "music/" if args.directory is None else args.directory
     artist = "Unknown" if args.artist is None else args.artist
-    is_album = False if args.album is None else True 
+    is_album = False if args.album is None else True
 
     proxies = None
     if args.proxy is not None:
@@ -107,8 +107,6 @@ def main():
         for proxy_string in proxy_strings:
             p = proxy_string.split('-')
             proxies[p[0]] = p[1]
-
-        print(proxies)
 
 
 
@@ -158,3 +156,4 @@ if __name__ == "__main__":
 #https-socks5://98.162.96.41:4145
 #https://18.140.249.11:80
 #https://www.youtube.com/playlist?list=PLOoPqX_q5JAUSng1aEWmEC1Q4E0EJnPts
+# short PL with one 10sec video: https://www.youtube.com/playlist?list=PLOoPqX_q5JAVEgR2bv8MxS9RFgxJPEoCv
