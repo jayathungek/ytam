@@ -1,3 +1,0 @@
-[console_scripts]
-ytam = ytam.cmd:main
-

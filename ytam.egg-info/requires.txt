@@ -1,7 +1,0 @@
-certifi
-chardet
-colorama
-idna
-mutagen
-requests
-urllib3

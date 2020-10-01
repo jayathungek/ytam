@@ -11,4 +11,3 @@ gui/
 dist/
 build/
 ytam.egg-info/
-setup.py
