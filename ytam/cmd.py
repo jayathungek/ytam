@@ -84,6 +84,15 @@ def parse_args(args):
         type=str,
         help="list of proxies to use. Must be enclosed in string quotes with a space separating each proxy. Proxy format: <protocol>-<proxy>",
     )
+    parser.add_argument(
+        "-3",
+        "--mp3",
+        type=bool,
+        nargs="?",
+        const=True,
+        default=False,
+        help="converts downloaded files to mp3 format and deletes original mp4 file",
+    )
     return parser.parse_args(args)
 
 def main():
@@ -119,7 +128,7 @@ def main():
         downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
         text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
-        d = Downloader(enumerate(urls[start:end]), len(urls), album, directory, artist, is_album, args.titles, args.image, proxies)
+        d = Downloader(enumerate(urls[start:end]), len(urls), album, directory, artist, is_album, args.titles, args.image, proxies, args.mp3)
         d.start = start
 
         retry = True

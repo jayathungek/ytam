@@ -39,7 +39,7 @@ class Downloader:
     retry_urls = []
     start = None
 
-    def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies):
+    def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies, mp3):
         self.urls = urls
         self.total_songs = total_songs
         self.album = album
@@ -50,6 +50,7 @@ class Downloader:
         self.image_filepath = image_filepath
         self.images = []
         self.proxies = proxies
+        self.mp3 = mp3
 
 
     def progress_function(self, chunk, file_handle, bytes_remaining):
@@ -175,7 +176,8 @@ class Downloader:
                 print(f"└── Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n")
 
             # "Convert" to mp3 lol
-            os.rename(path, f"{extract_title(path)}.mp3")
+            if self.mp3:
+                os.rename(path, f"{extract_title(path)}.mp3")
 
 
 
