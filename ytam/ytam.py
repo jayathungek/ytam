@@ -3,6 +3,8 @@ import os
 
 from pytube import YouTube, Playlist
 from mutagen.mp4 import MP4, MP4Cover
+from mutagen.id3 import ID3, TPE1, TIT2, TRCK, TALB, APIC
+import moviepy.editor as mp
 
 try:
     import font
@@ -23,6 +25,9 @@ def make_safe_filename(string):
 
 def extract_title(string):
     return string.split(".")[0]
+
+def extract_ext(string):
+    return string.split(".")[1]
 
 
 class Downloader:
@@ -68,17 +73,33 @@ class Downloader:
         print(progress, end=end, flush=True)
 
     def apply_metadata(
-        self, track_num, total, path, album, title, artist, image_filename
+        self, track_num, total, path, album, title, artist, image_filename, mp3
     ):
-        song = MP4(path)
-        song["\xa9alb"] = album
-        song["\xa9nam"] = title
-        song["\xa9ART"] = artist
-        song["trkn"] = [(track_num, total)]
+        if mp3:
+            song =  ID3(path)
+            song['TPE1'] = TPE1(encoding=3, text=artist)
+            song['TIT2'] = TIT2(encoding=3, text=title)
+            song['TRCK'] = TRCK(encoding=3, text=str(track_num))
+            song['TALB'] = TALB(encoding=3, text=album)
+            with open(image_filename, 'rb') as albumart:
+                song['APIC'] = APIC(
+                                  encoding=3,
+                                  mime=f"image/{extract_ext(image_filename)}",
+                                  type=3, desc=u'Cover',
+                                  data=albumart.read()
+                                )
+            song.save()
+        else:
+            song = MP4(path)
+            song["\xa9alb"] = album
+            song["\xa9nam"] = title
+            song["\xa9ART"] = artist
+            song["trkn"] = [(track_num, total)]
 
-        with open(image_filename, "rb") as f:
-            song["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
-        song.save()
+            with open(image_filename, "rb") as f:
+                song["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
+            song.save()
+        
 
     @staticmethod
     def download_image(url, index, outdir):
@@ -114,12 +135,18 @@ class Downloader:
             path = None
             try:
                 yt.register_on_progress_callback(self.progress_function)
-                self.cur_video = (
-                    yt.streams.filter(type="audio", subtype="mp4")
-                    .order_by("abr")
-                    .desc()
-                    .first()
-                )
+                if self.mp3:
+                    self.cur_video = (
+                        yt.streams.filter(res="360p")
+                        .first()
+                    )
+                else:
+                    self.cur_video = (
+                        yt.streams.filter(type="audio", subtype="mp4")
+                        .order_by("abr")
+                        .desc()
+                        .first()
+                    )
                 
                 safe_name = extract_title(make_safe_filename(self.cur_video.title))
                 path = self.cur_video.download(
@@ -160,6 +187,17 @@ class Downloader:
                 track_title = self.cur_video.title
                 track_artist = self.artist
 
+            if self.mp3:
+                try:
+                    print(f"└── Converting to mp3", end="\r")
+                    clip = mp.VideoFileClip(path)
+                    path = f"{extract_title(path)}.mp3"
+                    clip.audio.write_audiofile(path, verbose=False, logger=None)
+                    print(f"├── Converting to mp3 - {font.apply('bl', '[Done]')}")
+                    os.remove(f"{extract_title(path)}.mp4")
+                except Exception as e:
+                    print(f"├── Converting to mp3 - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
+
             try:
                 self.apply_metadata(
                     num + 1,
@@ -169,15 +207,16 @@ class Downloader:
                     track_title,
                     track_artist,
                     self.image_filepath,
+                    self.mp3
                 )
-                print(f"└── Applying metadata - {font.apply('bl', '[Done]')}\n")
+                print(f"└── Applying metadata - {font.apply('bl', '[Done]')}")
 
             except Exception as e:
-                print(f"└── Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n")
+                print(f"└── Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
 
-            # "Convert" to mp3 lol
-            if self.mp3:
-                os.rename(path, f"{extract_title(path)}.mp3")
+
+
+            print(" ")
 
 
 
