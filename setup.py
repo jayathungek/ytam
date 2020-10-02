@@ -31,7 +31,6 @@ setuptools.setup(
         "mutagen",
         "requests",
         "urllib3",
-        "moviepy",
         "ffmpeg-python"
     ]
 )
