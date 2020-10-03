@@ -91,7 +91,7 @@ def parse_args(args):
         nargs="?",
         const=True,
         default=False,
-        help="converts downloaded files to mp3 format and deletes original mp4 file",
+        help="converts downloaded files to mp3 format and deletes original mp4 file. Requires ffmpeg to be installed on your machine",
     )
     return parser.parse_args(args)
 
