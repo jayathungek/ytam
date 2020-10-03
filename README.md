@@ -5,15 +5,22 @@ A commandline utility that enables the creation of albums from Youtube playlists
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. <!-- See deployment for notes on how to deploy the project on a live system. -->
-<!-- 
+
 ### Prerequisites
 
+To be able to use the mp4 to mp3 conversion feature, ffmpeg must be installed.
 
+#### Debian:
 
 ```
+sudo apt-get install ffmpeg
+```
 
-``` -->
+#### Windows:
 
+- Download ffmpeg binaries [here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.zip)
+- Add the bin\\ directory to Windows PATH
+ 
 ### Installing
 ytam depends on a specific patch of pytube, which is not yet incorporated into its official release. Until this happens, first install the patch using:
 
@@ -59,7 +66,15 @@ optional arguments:
   -i IMAGE, --image IMAGE
                         the path to the image to be used as the album cover
                         (defaults to using the thumbnail of the first video in
-                        the playlist). Only works when -A flag is set 
+                        the playlist). Only works when -A flag is set
+  -p PROXY, --proxy PROXY
+                        list of proxies to use. Must be enclosed in string
+                        quotes with a space separating each proxy. Proxy
+                        format: <protocol>-<proxy>
+  -3 [MP3], --mp3 [MP3]
+                        converts downloaded files to mp3 format and deletes
+                        original mp4 file. Requires ffmpeg to be installed on 
+                        your machine
 ```
 
 ## Tests
@@ -93,6 +108,8 @@ Add additional notes about how to deploy this on a live system -->
 * [pytube](http://github.com/nficano/pytube.git) - Lightweight Python library for downloading videos
 * [mutagen](https://mutagen.readthedocs.io/en/latest/api/mp4.html) - For MP4 metadata tagging
 * [argparse](https://docs.python.org/3/library/argparse.html) - For parsing commandline arguments
+* [ffmpeg](https://ffmpeg.org/) - For mp4 to mp3 conversion
+
 <!-- ## Contributing
 
 Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
