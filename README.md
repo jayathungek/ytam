@@ -37,9 +37,9 @@ pip install ytam
 Usage:
 
 ```
-ytam [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
-               [-a ARTIST] [-i IMAGE]
-               URL
+usage: cmd.py [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
+              [-a ARTIST] [-i IMAGE] [-p PROXY] [-3 [MP3]]
+              URL
 
 positional arguments:
   URL                   the target URL of the playlist to download
@@ -64,16 +64,15 @@ optional arguments:
                         the name of the artist that performed the songs in the
                         playlist (defaults to Unknown)
   -i IMAGE, --image IMAGE
-                        the path to the image to be used as the album cover
-                        (defaults to using the thumbnail of the first video in
-                        the playlist). Only works when -A flag is set
+                        the path to the image to be used as the album cover.
+                        Only works when -A flag is set
   -p PROXY, --proxy PROXY
                         list of proxies to use. Must be enclosed in string
                         quotes with a space separating each proxy. Proxy
                         format: <protocol>-<proxy>
   -3 [MP3], --mp3 [MP3]
                         converts downloaded files to mp3 format and deletes
-                        original mp4 file. Requires ffmpeg to be installed on 
+                        original mp4 file. Requires ffmpeg to be installed on
                         your machine
 ```
 
