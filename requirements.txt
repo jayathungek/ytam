@@ -7,5 +7,4 @@ pytube3 @ git+git://github.com/nficano/pytube.git@0f32241c89192b22de9cfbfee1303a
 requests==2.24.0
 typing-extensions==3.7.4.2
 urllib3==1.25.10
-moviepy==1.0.3
 ffmpeg-python==0.2.0
