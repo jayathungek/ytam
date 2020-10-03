@@ -76,7 +76,7 @@ def parse_args(args):
         "-i",
         "--image",
         type=str,
-        help="the path to the image to be used as the album cover (defaults to using the thumbnail of the first video in the playlist). Only works when -A flag is set",
+        help="the path to the image to be used as the album cover. Only works when -A flag is set",
     )
     parser.add_argument(
         "-p",
