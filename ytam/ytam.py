@@ -1,11 +1,11 @@
-import requests
 import os 
+import requests
+import asyncio
 
 from pytube import YouTube, Playlist
 from mutagen.mp4 import MP4, MP4Cover
-from mutagen.id3 import ID3, TPE1, TIT2, TRCK, TALB, APIC
 
-import ffmpeg
+from ffmpeg import FFmpeg
 
 try:
     import font
@@ -30,6 +30,10 @@ def extract_title(string):
 def extract_ext(string):
     return string.split(".")[1]
 
+def to_sec(timestamp):
+    sep = timestamp.split(":")
+    h, m, s = (int(sep[0]), int(sep[1]), float(sep[2]))
+    return (h * 60 * 60) + (m * 60) + round(s)
 
 class Downloader:
     is_album = None
@@ -73,6 +77,7 @@ class Downloader:
 
         print(progress, end=end, flush=True)
 
+
     def apply_metadata(
         self, track_num, total, path, album, title, artist, image_filename
     ):
@@ -82,8 +87,10 @@ class Downloader:
         song["\xa9ART"] = artist
         song["trkn"] = [(track_num, total)]
 
-        with open(image_filename, "rb") as f:
-            song["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
+        if image_filename is not None:
+            with open(image_filename, "rb") as f:
+                song["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
+        
         song.save()
         
 
@@ -143,19 +150,19 @@ class Downloader:
 
                 continue
 
-            if self.is_album:
-                if self.image_filepath is None:
-                    if not self.album_image_set:
-                        image_path = Downloader.download_image(
-                            yt.thumbnail_url, num, self.outdir
-                        )
-                        self.images.append(image_path)
-                        self.image_filepath = image_path
-                        self.album_image_set = True
-            else:
-                image_path = Downloader.download_image(yt.thumbnail_url, num, self.outdir)
-                self.images.append(image_path)
-                self.image_filepath = image_path
+            # if self.is_album:
+            #     if self.image_filepath is None:
+            #         if not self.album_image_set:
+            #             image_path = Downloader.download_image(
+            #                 yt.thumbnail_url, num, self.outdir
+            #             )
+            #             self.images.append(image_path)
+            #             self.image_filepath = image_path
+            #             self.album_image_set = True
+            # else:
+            #     image_path = Downloader.download_image(yt.thumbnail_url, num, self.outdir)
+            #     self.images.append(image_path)
+            #     self.image_filepath = image_path
 
             track_title = None
             track_artist = None
@@ -185,13 +192,31 @@ class Downloader:
                 print(f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
             
             if self.mp3:
+                ffmpeg = FFmpeg().input(path).output(f"{extract_title(path)}.mp3")
+
+                @ffmpeg.on('progress')
+                def mp3_conv_progress(event):
+                    p = (to_sec(event.time)/int(yt.length)) * 100 
+                    progress = (
+                        f"└── Converting to mp3 - [{p:.2f}%]"
+                        if p < 100
+                        else f"└── Converting to mp3 - {font.apply('bl', '[Done]          ')}"
+                    )
+
+                    end = "\n" if p >= 100 else "\r"
+                    print(progress, end=end, flush=True)
+
                 try:
-                    print(f"└── Converting to mp3", end="\r")
-                    (ffmpeg
-                        .input(path, loglevel="fatal")
-                        .output(f"{extract_title(path)}.mp3")
-                        .run())
-                    print(f"└── Converting to mp3 - {font.apply('bl', '[Done]')}")
+                # print(f"└── Converting to mp3", end="\r")
+                # (ffmpeg
+                #     .input(path, loglevel="fatal")
+                #     .output(f"{extract_title(path)}.mp3")
+                #     .run())
+                # print(f"└── Converting to mp3 - {font.apply('bl', '[Done]')}")
+                    loop = asyncio.get_event_loop()
+                    loop.run_until_complete(ffmpeg.execute())
+                    loop.close()
+
                     os.remove(f"{extract_title(path)}.mp4")
                     path = f"{extract_title(path)}.mp3"
                 
