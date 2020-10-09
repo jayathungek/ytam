@@ -23,9 +23,7 @@ setuptools.setup(
     entry_points = {
         'console_scripts': ['ytam=ytam.cmd:main'],
     },
-    package_data = {
-        'check': ['*']
-    },
+    include_package_data=True,
     install_requires=[
         "certifi",
         "chardet",
