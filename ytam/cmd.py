@@ -109,9 +109,9 @@ def parse_args(args):
     return parser.parse_args(args)
 
 def main():
-    print("Initialising.")
-    colorama.init()
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
+        print("Initialising.")
+        colorama.init()
         urls = Playlist("https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a")
         playlist_title = urls.title()
         start = 0
@@ -126,6 +126,8 @@ def main():
         mp3 = True
 
     else:
+        print("Initialising.")
+        colorama.init()
         args = parse_args(sys.argv[1:])
         urls = Playlist(args.url)
         playlist_title = urls.title()
