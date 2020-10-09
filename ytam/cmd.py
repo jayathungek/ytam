@@ -16,6 +16,10 @@ except ModuleNotFoundError:
 
 
 
+full_path = os.path.realpath(__file__).split("/")
+BASE = f"{'/'.join(full_path[:-1])}"
+
+
 def check_positive(value):
     ivalue = int(value)
     if ivalue <= 0:
@@ -117,8 +121,8 @@ def main():
         artist = "Test Artist"
         is_album = True
         proxies = None
-        image = "check/check.jpg"
-        titles = "check/check.txt"
+        image = f"{BASE}/check/check.jpg"
+        titles = f"{BASE}/check/check.txt"
         mp3 = True
 
     else:
