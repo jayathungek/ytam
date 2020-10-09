@@ -93,30 +93,55 @@ def parse_args(args):
         default=False,
         help="converts downloaded files to mp3 format and deletes original mp4 file. Requires ffmpeg to be installed on your machine",
     )
+    parser.add_argument(
+        "-k",
+        "--check",
+        type=bool,
+        nargs="?",
+        const=True,
+        default=False,
+        help="checks whether ytam is working as it should by trying to download a pre-defined playlist and setting pre-defined metadata. Setting this argument causes ytam to ignore ALL others",
+    )
     return parser.parse_args(args)
 
 def main():
-    args = parse_args(sys.argv[1:])
     print("Initialising.")
     colorama.init()
-    urls = Playlist(args.url)
-    playlist_title = urls.title()
+    if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
+        urls = Playlist("https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a")
+        playlist_title = urls.title()
+        start = 0
+        end = len(urls)
+        album = "Test Album"
+        directory = "music/"
+        artist = "Test Artist"
+        is_album = True
+        proxies = None
+        image = "check/check.jpg"
+        titles = "check/check.txt"
+        mp3 = True
 
-    start = 0 if args.start is None else args.start - 1
-    end = len(urls) if args.end is None else args.end
-    album = playlist_title if args.album is None else args.album
-    directory = "music/" if args.directory is None else args.directory
-    artist = "Unknown" if args.artist is None else args.artist
-    is_album = False if args.album is None else True
-
-    proxies = None
-    if args.proxy is not None:
-        proxy_strings = [proxy.strip() for proxy in args.proxy.split(" ")]
-        proxies = {}
-        for proxy_string in proxy_strings:
-            p = proxy_string.split('-')
-            proxies[p[0]] = p[1]
-
+    else:
+        args = parse_args(sys.argv[1:])
+        urls = Playlist(args.url)
+        playlist_title = urls.title()
+        start = 0 if args.start is None else args.start - 1
+        end = len(urls) if args.end is None else args.end
+        album = playlist_title if args.album is None else args.album
+        directory = "music/" if args.directory is None else args.directory
+        artist = "Unknown" if args.artist is None else args.artist
+        is_album = False if args.album is None else True
+        image = args.image 
+        titles = args.titles
+        mp3 = args.mp3
+        
+        proxies = None
+        if args.proxy is not None:
+            proxy_strings = [proxy.strip() for proxy in args.proxy.split(" ")]
+            proxies = {}
+            for proxy_string in proxy_strings:
+                p = proxy_string.split('-')
+                proxies[p[0]] = p[1]
 
 
     try:
@@ -128,7 +153,7 @@ def main():
         downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
         text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
-        d = Downloader(enumerate(urls[start:end]), len(urls), album, directory, artist, is_album, args.titles, args.image, proxies, args.mp3)
+        d = Downloader(list(enumerate(urls[start:end])), len(urls), album, directory, artist, is_album, titles, image, proxies, mp3)
         d.start = start
 
         retry = True
@@ -138,7 +163,8 @@ def main():
             print(f"{d.successful}/{len(urls[start:end])} downloaded successfully.\n")
             if len(d.retry_urls) > 0:
                 d.set_retries()
-                user = input(f"Retry {font.apply('fb', str(len(d.urls)) + ' failed')} downloads? Y/N ")
+                urls_copy = d.urls.copy()
+                user = input(f"Retry {font.apply('fb', str(len(list(urls_copy))) + ' failed')} downloads? Y/N ")
                 if not is_affirmative(user):
                     retry = False
                 else:

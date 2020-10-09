@@ -109,6 +109,7 @@ class Downloader:
             tg.make_titles()
             metadata = tg.get_titles()
 
+        loop = asyncio.get_event_loop()
         for num, url in self.urls:
             yt = None
             self.cur_song = num+self.start+1
@@ -119,7 +120,7 @@ class Downloader:
                     yt = YouTube(url)
 
             except Exception as e:
-                self.retry_urls.append(url)
+                self.retry_urls.append((num, url))
                 print(
                     f"Downloading song {font.apply('gb', str(self.cur_song))} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
                 )
@@ -207,15 +208,7 @@ class Downloader:
                     print(progress, end=end, flush=True)
 
                 try:
-                # print(f"└── Converting to mp3", end="\r")
-                # (ffmpeg
-                #     .input(path, loglevel="fatal")
-                #     .output(f"{extract_title(path)}.mp3")
-                #     .run())
-                # print(f"└── Converting to mp3 - {font.apply('bl', '[Done]')}")
-                    loop = asyncio.get_event_loop()
                     loop.run_until_complete(ffmpeg.execute())
-                    loop.close()
 
                     os.remove(f"{extract_title(path)}.mp4")
                     path = f"{extract_title(path)}.mp3"
@@ -224,6 +217,7 @@ class Downloader:
                     print(f"└── Converting to mp3 - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
 
             print(" ")
+        loop.close()
 
 
 
