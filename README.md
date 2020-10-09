@@ -74,6 +74,11 @@ optional arguments:
                         converts downloaded files to mp3 format and deletes
                         original mp4 file. Requires ffmpeg to be installed on
                         your machine
+  -k [CHECK], --check [CHECK]
+                        checks whether ytam is working as it should by trying
+                        to download a pre-defined playlist and setting pre-
+                        defined metadata. Setting this argument causes ytam to
+                        ignore ALL others
 ```
 
 ## Tests
