@@ -1,8 +1,11 @@
 import os
+import re
 try:
     import error
 except ModuleNotFoundError:
     import ytam.error as error
+
+DELIM = "<@>"
 
 class Title:
     def __init__(self, index, title, artist):
@@ -20,7 +23,7 @@ class TitleGenerator:
 
     def check_line(self, line, line_num):
         if not (len(line) > 0 and len(line) < 3):
-            msg = "wrong number of fields - only <title>, <artist> allowed"
+            msg = "wrong number of fields - only title and artist allowed"
             raise error.BadTitleFormatError(self.filename, line_num + 1, msg)
 
     def make_titles(self):
@@ -30,7 +33,7 @@ class TitleGenerator:
 
                 for i, line in enumerate(lines):
                     line = line.strip()
-                    line = line.split(",")
+                    line = re.split(DELIM, line)
                     self.check_line(line, i)
 
                     t = Title(i, None, None)
