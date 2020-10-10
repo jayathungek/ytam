@@ -37,9 +37,9 @@ pip install ytam
 Usage:
 
 ```
-usage: cmd.py [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
-              [-a ARTIST] [-i IMAGE] [-p PROXY] [-3 [MP3]]
-              URL
+usage: ytam [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
+            [-a ARTIST] [-i IMAGE] [-p PROXY] [-3 [MP3]]
+            URL
 
 positional arguments:
   URL                   the target URL of the playlist to download
