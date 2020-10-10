@@ -56,13 +56,13 @@ def parse_args(args):
         "-s",
         "--start",
         type=check_positive,
-        help="from which position in the playlist to start downloading",
+        help="from which position in the playlist to start downloading (defaults to 1)",
     )
     parser.add_argument(
         "-e",
         "--end",
         type=check_positive,
-        help="position in the playlist of the last song to be downloaded",
+        help="position in the playlist of the last song to be downloaded (defaults to last position in the playlist)",
     )
     parser.add_argument(
         "-A",
@@ -145,7 +145,7 @@ def main():
                 p = proxy_string.split('-')
                 proxies[p[0]] = p[1]
 
-    
+
     print("Initialising.")
     colorama.init()
     try:
