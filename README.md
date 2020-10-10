@@ -38,7 +38,7 @@ Usage:
 
 ```
 usage: ytam [-h] [-t TITLES] [-d DIRECTORY] [-s START] [-e END] [-A ALBUM]
-            [-a ARTIST] [-i IMAGE] [-p PROXY] [-3 [MP3]]
+            [-a ARTIST] [-i IMAGE] [-p PROXY] [-3 [MP3]] [-k [CHECK]]
             URL
 
 positional arguments:
@@ -54,9 +54,9 @@ optional arguments:
                         subdirectory of the current directory)
   -s START, --start START
                         from which position in the playlist to start
-                        downloading
+                        downloading (defaults to 1)
   -e END, --end END     position in the playlist of the last song to be
-                        downloaded
+                        downloaded (defaults to last position in the playlist)
   -A ALBUM, --album ALBUM
                         the name of the album that the songs in the playlist
                         belongs to (defaults to playlist title)
