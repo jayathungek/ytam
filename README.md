@@ -47,8 +47,9 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -t TITLES, --titles TITLES
-                        a plain text file containing the desired names of the
-                        songs in the playlist (each on a new line)
+                        a plain text file containing the desired titles and
+                        artists of the songs in the playlist, each on a new
+                        line. Format: title<@>artist
   -d DIRECTORY, --directory DIRECTORY
                         the download directory (defaults to 'music' - a
                         subdirectory of the current directory)
