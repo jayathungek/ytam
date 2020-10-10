@@ -45,7 +45,7 @@ def parse_args(args):
     parser.add_argument(
         "-t",
         "--titles",
-        help="a plain text file containing the desired names of the songs in the playlist (each on a new line)",
+        help="a plain text file containing the desired titles and artists of the songs in the playlist, each on a new line. Format: title<@>artist",
     )
     parser.add_argument(
         "-d",
@@ -110,6 +110,7 @@ def parse_args(args):
 
 def main():
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
+        print("Initialising.")
         urls = Playlist("https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a")
         playlist_title = urls.title()
         start = 0
@@ -125,6 +126,7 @@ def main():
 
     else:
         args = parse_args(sys.argv[1:])
+        print("Initialising.")
         urls = Playlist(args.url)
         playlist_title = urls.title()
         start = 0 if args.start is None else args.start - 1
@@ -146,7 +148,6 @@ def main():
                 proxies[p[0]] = p[1]
 
 
-    print("Initialising.")
     colorama.init()
     try:
         if start >= len(urls):
