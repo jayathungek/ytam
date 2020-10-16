@@ -104,12 +104,15 @@ class Downloader:
 
     def download(self):
         metadata = None
+
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+
         if self.metadata_filepath is not None:
             tg = TitleGenerator(self.metadata_filepath, self.artist)
             tg.make_titles()
             metadata = tg.get_titles()
 
-        loop = asyncio.get_event_loop()
         for num, url in self.urls:
             yt = None
             self.cur_song = num+self.start+1
@@ -143,14 +146,13 @@ class Downloader:
                 )
                 self.successful_filepaths.append(path)
                 self.successful += 1
-            except Exception as e:
+            except (Exception, KeyboardInterrupt) as e:
                 self.retry_urls.append((num, url))
                 print(
                     f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
                 )
 
                 continue
-
             # if self.is_album:
             #     if self.image_filepath is None:
             #         if not self.album_image_set:
@@ -189,7 +191,7 @@ class Downloader:
                 )
                 print(f"{metadata_branch} Applying metadata - {font.apply('bl', '[Done]')}")
 
-            except Exception as e:
+            except (Exception, KeyboardInterrupt) as e:
                 print(f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
             
             if self.mp3:
@@ -213,14 +215,11 @@ class Downloader:
                     os.remove(f"{extract_title(path)}.mp4")
                     path = f"{extract_title(path)}.mp3"
                 
-                except Exception as e:
+                except (Exception, KeyboardInterrupt) as e:
                     print(f"└── Converting to mp3 - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
 
             print(" ")
         loop.close()
-
-
-
 
 
     def set_retries(self):

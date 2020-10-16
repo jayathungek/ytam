@@ -149,6 +149,7 @@ def main():
 
 
     colorama.init()
+    d = None
     try:
         if start >= len(urls):
             raise error.InvalidPlaylistIndexError(start, playlist_title)
@@ -177,10 +178,6 @@ def main():
                     print(f"{font.apply('gb', '─'*len('Retrying.'))}")
             else:
                 retry = False
-
-        for image in d.images:
-            os.remove(image)
-        d.images = []
 
     except (
         error.InvalidPlaylistIndexError,
