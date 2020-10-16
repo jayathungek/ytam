@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ytam",
-    version="0.1.0",
+    version="0.1.1",
     author="jayathungek",
     author_email="jayathunge.work@gmail.com",
     description="A commandline utility that enables the creation of albums from Youtube playlists.",
