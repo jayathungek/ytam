@@ -22,10 +22,10 @@ sudo apt-get install ffmpeg
 - Add the bin\\ directory to Windows PATH
  
 ### Installing
-ytam depends on a specific patch of pytube, which is not yet incorporated into its official release. Until this happens, first install the patch using:
+ytam depends on the latest patch of pytube, which is not yet incorporated into its official release. Until this happens, first install the patch using:
 
 ```
-pip install git+git://github.com/nficano/pytube.git@0f32241c89192b22de9cfbfee1303a1bcee18bd3
+pip install git+https://github.com/nficano/pytube
 ```
 
 Then:
