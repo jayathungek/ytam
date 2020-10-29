@@ -18,7 +18,7 @@ sudo apt-get install ffmpeg
 
 #### Windows:
 
-- Download ffmpeg binaries [here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.zip)
+- Download ffmpeg binaries from [here](https://www.gyan.dev/ffmpeg/builds)
 - Add the bin\\ directory to Windows PATH
  
 ### Installing
