@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 
 import argparse
 import colorama
@@ -16,8 +17,10 @@ except ModuleNotFoundError:
 
 
 
-full_path = os.path.realpath(__file__).split("/")
-BASE = f"{'/'.join(full_path[:-1])}"
+full_path = os.path.realpath(__file__).split('/')
+SEP = '\\' if platform.system() == "Windows" else '/'
+BASE = f"{SEP.join(full_path[:-1])}"
+
 
 
 def check_positive(value):
@@ -116,12 +119,12 @@ def main():
         start = 0
         end = len(urls)
         album = "Test Album"
-        directory = "music/"
+        directory = f"music{SEP}"
         artist = "Test Artist"
         is_album = True
         proxies = None
-        image = f"{BASE}/check/check.jpg"
-        titles = f"{BASE}/check/check.txt"
+        image = f"{BASE}{SEP}check{SEP}check.jpg"
+        titles = f"{BASE}{SEP}check{SEP}check.txt"
         mp3 = True
 
     else:
