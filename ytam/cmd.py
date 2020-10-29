@@ -17,8 +17,8 @@ except ModuleNotFoundError:
 
 
 
-full_path = os.path.realpath(__file__).split('/')
 SEP = '\\' if platform.system() == "Windows" else '/'
+full_path = os.path.realpath(__file__).split(SEP)
 BASE = f"{SEP.join(full_path[:-1])}"
 
 
