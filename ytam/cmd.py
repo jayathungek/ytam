@@ -115,7 +115,7 @@ def main():
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
         print("Initialising.")
         urls = Playlist("https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a")
-        playlist_title = urls.title()
+        playlist_title = urls.title
         start = 0
         end = len(urls)
         album = "Test Album"
@@ -131,7 +131,7 @@ def main():
         args = parse_args(sys.argv[1:])
         print("Initialising.")
         urls = Playlist(args.url)
-        playlist_title = urls.title()
+        playlist_title = urls.title
         start = 0 if args.start is None else args.start - 1
         end = len(urls) if args.end is None else args.end
         album = playlist_title if args.album is None else args.album
