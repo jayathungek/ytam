@@ -1,4 +1,5 @@
-import os 
+import os
+import re
 import requests
 import asyncio
 
@@ -8,12 +9,17 @@ from mutagen.mp4 import MP4, MP4Cover
 from ffmpeg import FFmpeg
 
 try:
+    import error
     import font
     from title import TitleGenerator
 except ModuleNotFoundError:
+    import ytam.error as error
     import ytam.font as font
     from ytam.title import TitleGenerator
 
+
+URL_EXP = r"(https?://)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
+URL_PATTERN = re.compile(URL_EXP)
 
 def make_safe_filename(string):
     def safe_char(c):
@@ -35,6 +41,10 @@ def to_sec(timestamp):
     h, m, s = (int(sep[0]), int(sep[1]), float(sep[2]))
     return (h * 60 * 60) + (m * 60) + round(s)
 
+def is_url(s):
+    return True if URL_PATTERN.match(s) else False
+
+
 class Downloader:
     is_album = None
     album_image_set = False
@@ -47,6 +57,7 @@ class Downloader:
     cur_song = 1
     successful_filepaths = []
     retry_urls = []
+    to_delete = []
     start = None
 
     def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies, mp3):
@@ -97,6 +108,9 @@ class Downloader:
     @staticmethod
     def download_image(url, index, outdir):
         thumbnail_image = requests.get(url)
+        if thumbnail_image.content == b'':
+            raise error.ImageDownloadError(url)
+
         filename = outdir + f"album_art_{str(index)}.jpg"
         with open(filename, "wb",) as f:
             f.write(thumbnail_image.content)
@@ -109,12 +123,18 @@ class Downloader:
         loop = asyncio.get_event_loop()
 
         if self.metadata_filepath is not None:
-            tg = TitleGenerator(self.metadata_filepath, self.artist)
+            if self.is_album:
+                tg = TitleGenerator(self.metadata_filepath, self.artist)
+            else:
+                tg = TitleGenerator(self.metadata_filepath, self.artist, no_album=True)
+
             tg.make_titles()
             metadata = tg.get_titles()
 
         for num, url in self.urls:
             yt = None
+            image_dl_failed = False
+            failed_image_url = ""
             self.cur_song = num+self.start+1
             try:
                 if self.proxies is not None:
@@ -173,21 +193,41 @@ class Downloader:
                 t = metadata[num]
                 track_title = t.title if not t.unused else self.cur_video.title
                 track_artist = t.artist if not t.unused else self.artist
+                track_album = self.album
+                track_image_path = self.image_filepath
+                if not self.is_album:
+                    track_album = t.album
+                    if t.image_path is not None:
+                        if not is_url(t.image_path):
+                            track_image_path = t.image_path
+                        else:
+                            try:
+                                track_image_path = Downloader.download_image(t.image_path, num, self.outdir)
+                                self.to_delete.append(track_image_path)
+                            except error.ImageDownloadError as e:
+                                image_dl_failed = True
+                                failed_image_url = t.image_path
+
             else:
                 track_title = self.cur_video.title
                 track_artist = self.artist
+                track_album = self.album
+                track_image_path = self.image_filepath
 
             metadata_branch = "├──" if self.mp3 else "└──"
 
             try:
+                if image_dl_failed:
+                    raise error.ImageDownloadError(failed_image_url)
+
                 self.apply_metadata(
                     num + 1,
                     self.total_songs,
                     path,
-                    self.album,
+                    track_album,
                     track_title,
                     track_artist,
-                    self.image_filepath
+                    track_image_path
                 )
                 print(f"{metadata_branch} Applying metadata - {font.apply('bl', '[Done]')}")
 
@@ -220,9 +260,15 @@ class Downloader:
 
             print(" ")
         loop.close()
+        for image in self.to_delete:
+            os.remove(image)
 
 
     def set_retries(self):
         self.album_image_set = False
         self.urls = self.retry_urls
         self.retry_urls = []
+
+if __name__ == "__main__":
+    test = "https://img.discogs.com/jlQ8QxrOHhz1Jn0oxJFHWS1V69c=/fit-in/355x355/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-15034497-1585801110-9244.jpeg.jpg"
+    print(is_url(test))
