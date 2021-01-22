@@ -1,8 +1,7 @@
 class Error(Exception):
     """Base class for exceptions in this module."""
-
-    pass
-
+    def __str__(self):
+        return self.message
 
 class EmptyUrlFieldError(Error):
     def __init__(self):
@@ -48,9 +47,17 @@ class InvalidPathError(Error):
     def __init__(self, path):
         self.message = f"DIR {path} is not a valid directory."
 
+class ImageDownloadError(Error):
+    def __init__(self, url):
+        self.message = f"Could not download image at {url}."
+
 
 # bad url
 # url not for playlist
 # title file not found
 # invalid line in title file
 # directory not found
+
+if __name__ == "__main__":
+    e = ImageDownloadError("jxnjsxsjx")
+    print(str(e))
