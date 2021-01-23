@@ -204,6 +204,7 @@ class Downloader:
                             try:
                                 track_image_path = Downloader.download_image(t.image_path, num, self.outdir)
                                 self.to_delete.append(track_image_path)
+                                num = 0 #track num should always be 1 if downloading a single
                             except error.ImageDownloadError as e:
                                 image_dl_failed = True
                                 failed_image_url = t.image_path
