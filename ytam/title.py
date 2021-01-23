@@ -1,11 +1,13 @@
 import os
 import re
+
 try:
     import error
 except ModuleNotFoundError:
     import ytam.error as error
 
 DELIM = "<@>"
+
 
 class Title:
     def __init__(self, index, title, artist, album, image_path):
@@ -64,7 +66,7 @@ class TitleGenerator:
                             t.image_path = line[3]
 
                     self.titles.append(t)
-                        
+
         except FileNotFoundError:
             raise error.TitlesNotFoundError(self.filename)
 

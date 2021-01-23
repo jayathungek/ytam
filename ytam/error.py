@@ -1,7 +1,9 @@
 class Error(Exception):
     """Base class for exceptions in this module."""
+
     def __str__(self):
         return self.message
+
 
 class EmptyUrlFieldError(Error):
     def __init__(self):
@@ -46,6 +48,7 @@ class InvalidFieldError(Error):
 class InvalidPathError(Error):
     def __init__(self, path):
         self.message = f"DIR {path} is not a valid directory."
+
 
 class ImageDownloadError(Error):
     def __init__(self, url):

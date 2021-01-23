@@ -16,11 +16,9 @@ except ModuleNotFoundError:
     from ytam.ytam import Downloader
 
 
-
-SEP = '\\' if platform.system() == "Windows" else '/'
+SEP = "\\" if platform.system() == "Windows" else "/"
 full_path = os.path.realpath(__file__).split(SEP)
 BASE = f"{SEP.join(full_path[:-1])}"
-
 
 
 def check_positive(value):
@@ -28,6 +26,7 @@ def check_positive(value):
     if ivalue <= 0:
         raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
     return ivalue
+
 
 def is_affirmative(string):
     string = string.strip().lower()
@@ -111,10 +110,13 @@ def parse_args(args):
     )
     return parser.parse_args(args)
 
+
 def main():
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
         print("Initialising.")
-        urls = Playlist("https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a")
+        urls = Playlist(
+            "https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a"
+        )
         playlist_title = urls.title
         start = 0
         end = len(urls)
@@ -138,18 +140,17 @@ def main():
         directory = "music/" if args.directory is None else args.directory
         artist = "Unknown" if args.artist is None else args.artist
         is_album = False if args.album is None else True
-        image = args.image 
+        image = args.image
         titles = args.titles
         mp3 = args.mp3
-        
+
         proxies = None
         if args.proxy is not None:
             proxy_strings = [proxy.strip() for proxy in args.proxy.split(" ")]
             proxies = {}
             for proxy_string in proxy_strings:
-                p = proxy_string.split('-')
+                p = proxy_string.split("-")
                 proxies[p[0]] = p[1]
-
 
     colorama.init()
     d = None
@@ -160,9 +161,27 @@ def main():
             raise error.IndicesOutOfOrderError()
 
         downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
-        text_len = len("Downloading songs ") + len(str(start)) + len(" - ") + len(str(end)) + len(" from playlist ") + len(playlist_title) 
+        text_len = (
+            len("Downloading songs ")
+            + len(str(start))
+            + len(" - ")
+            + len(str(end))
+            + len(" from playlist ")
+            + len(playlist_title)
+        )
         print(downloading_message, f"\n{font.apply('gb', '─'*text_len)}")
-        d = Downloader(list(enumerate(urls[start:end])), len(urls), album, directory, artist, is_album, titles, image, proxies, mp3)
+        d = Downloader(
+            list(enumerate(urls[start:end])),
+            len(urls),
+            album,
+            directory,
+            artist,
+            is_album,
+            titles,
+            image,
+            proxies,
+            mp3,
+        )
         d.start = start
 
         retry = True
@@ -173,7 +192,9 @@ def main():
             if len(d.retry_urls) > 0:
                 d.set_retries()
                 urls_copy = d.urls.copy()
-                user = input(f"Retry {font.apply('fb', str(len(list(urls_copy))) + ' failed')} downloads? Y/N ")
+                user = input(
+                    f"Retry {font.apply('fb', str(len(list(urls_copy))) + ' failed')} downloads? Y/N "
+                )
                 if not is_affirmative(user):
                     retry = False
                 else:
@@ -190,10 +211,11 @@ def main():
     ) as e:
         print(f"Error: {e.message}")
 
+
 if __name__ == "__main__":
     main()
 
-#https-socks5://98.162.96.41:4145
-#https://18.140.249.11:80
-#https://www.youtube.com/playlist?list=PLOoPqX_q5JAUSng1aEWmEC1Q4E0EJnPts
+# https-socks5://98.162.96.41:4145
+# https://18.140.249.11:80
+# https://www.youtube.com/playlist?list=PLOoPqX_q5JAUSng1aEWmEC1Q4E0EJnPts
 # short PL with one 10sec video: https://www.youtube.com/playlist?list=PLOoPqX_q5JAVEgR2bv8MxS9RFgxJPEoCv

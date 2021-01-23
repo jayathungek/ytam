@@ -21,6 +21,7 @@ except ModuleNotFoundError:
 URL_EXP = r"(https?://)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
 URL_PATTERN = re.compile(URL_EXP)
 
+
 def make_safe_filename(string):
     def safe_char(c):
         if c.isalnum():
@@ -30,16 +31,20 @@ def make_safe_filename(string):
 
     return "".join(safe_char(c) for c in string).rstrip("_")
 
+
 def extract_title(string):
     return string.split(".")[0]
 
+
 def extract_ext(string):
     return string.split(".")[1]
+
 
 def to_sec(timestamp):
     sep = timestamp.split(":")
     h, m, s = (int(sep[0]), int(sep[1]), float(sep[2]))
     return (h * 60 * 60) + (m * 60) + round(s)
+
 
 def is_url(s):
     return True if URL_PATTERN.match(s) else False
@@ -60,7 +65,19 @@ class Downloader:
     to_delete = []
     start = None
 
-    def __init__(self, urls, total_songs, album, outdir, artist, is_album, metadata, image_filepath, proxies, mp3):
+    def __init__(
+        self,
+        urls,
+        total_songs,
+        album,
+        outdir,
+        artist,
+        is_album,
+        metadata,
+        image_filepath,
+        proxies,
+        mp3,
+    ):
         self.urls = urls
         self.total_songs = total_songs
         self.album = album
@@ -72,7 +89,6 @@ class Downloader:
         self.images = []
         self.proxies = proxies
         self.mp3 = mp3
-
 
     def progress_function(self, chunk, file_handle, bytes_remaining):
         title = self.cur_video.title
@@ -88,7 +104,6 @@ class Downloader:
 
         print(progress, end=end, flush=True)
 
-
     def apply_metadata(
         self, track_num, total, path, album, title, artist, image_filename
     ):
@@ -101,14 +116,13 @@ class Downloader:
         if image_filename is not None:
             with open(image_filename, "rb") as f:
                 song["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
-        
+
         song.save()
-        
 
     @staticmethod
     def download_image(url, index, outdir):
         thumbnail_image = requests.get(url)
-        if thumbnail_image.content == b'':
+        if thumbnail_image.content == b"":
             raise error.ImageDownloadError(url)
 
         filename = outdir + f"album_art_{str(index)}.jpg"
@@ -135,7 +149,7 @@ class Downloader:
             yt = None
             image_dl_failed = False
             failed_image_url = ""
-            self.cur_song = num+self.start+1
+            self.cur_song = num + self.start + 1
             try:
                 if self.proxies is not None:
                     yt = YouTube(url, proxies=self.proxies)
@@ -158,11 +172,10 @@ class Downloader:
                     .desc()
                     .first()
                 )
-                
+
                 safe_name = extract_title(make_safe_filename(self.cur_video.title))
                 path = self.cur_video.download(
-                    output_path=self.outdir,
-                    filename=safe_name,
+                    output_path=self.outdir, filename=safe_name,
                 )
                 self.successful_filepaths.append(path)
                 self.successful += 1
@@ -202,9 +215,11 @@ class Downloader:
                             track_image_path = t.image_path
                         else:
                             try:
-                                track_image_path = Downloader.download_image(t.image_path, num, self.outdir)
+                                track_image_path = Downloader.download_image(
+                                    t.image_path, num, self.outdir
+                                )
                                 self.to_delete.append(track_image_path)
-                                num = 0 #track num should always be 1 if downloading a single
+                                num = 0  # track num should always be 1 if downloading a single
                             except error.ImageDownloadError as e:
                                 image_dl_failed = True
                                 failed_image_url = t.image_path
@@ -228,19 +243,23 @@ class Downloader:
                     track_album,
                     track_title,
                     track_artist,
-                    track_image_path
+                    track_image_path,
                 )
-                print(f"{metadata_branch} Applying metadata - {font.apply('bl', '[Done]')}")
+                print(
+                    f"{metadata_branch} Applying metadata - {font.apply('bl', '[Done]')}"
+                )
 
             except (Exception, KeyboardInterrupt) as e:
-                print(f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
-            
+                print(
+                    f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}"
+                )
+
             if self.mp3:
                 ffmpeg = FFmpeg().input(path).output(f"{extract_title(path)}.mp3")
 
-                @ffmpeg.on('progress')
+                @ffmpeg.on("progress")
                 def mp3_conv_progress(event):
-                    p = (to_sec(event.time)/int(yt.length)) * 100 
+                    p = (to_sec(event.time) / int(yt.length)) * 100
                     progress = (
                         f"└── Converting to mp3 - [{p:.2f}%]"
                         if p < 100
@@ -255,20 +274,22 @@ class Downloader:
 
                     os.remove(f"{extract_title(path)}.mp4")
                     path = f"{extract_title(path)}.mp3"
-                
+
                 except (Exception, KeyboardInterrupt) as e:
-                    print(f"└── Converting to mp3 - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}")
+                    print(
+                        f"└── Converting to mp3 - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}"
+                    )
 
             print(" ")
         loop.close()
         for image in self.to_delete:
             os.remove(image)
 
-
     def set_retries(self):
         self.album_image_set = False
         self.urls = self.retry_urls
         self.retry_urls = []
+
 
 if __name__ == "__main__":
     test = "https://img.discogs.com/jlQ8QxrOHhz1Jn0oxJFHWS1V69c=/fit-in/355x355/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-15034497-1585801110-9244.jpeg.jpg"
