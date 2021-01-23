@@ -48,7 +48,7 @@ def parse_args(args):
     parser.add_argument(
         "-t",
         "--titles",
-        help="a plain text file containing the desired titles and artists of the songs in the playlist, each on a new line. Format: title<@>artist",
+        help="a plain text file containing the desired titles and artists of the songs in the playlist, each on a new line. Format: title<@>artist. Note: if the --album flag is not set, each entry in this file is treated as a single with its own title, artist, album and cover art. In this case, title, artist and album are mandatory and cover art is optional. Format: title<@>artist<@>album[<@>local path or url to image]",
     )
     parser.add_argument(
         "-d",
