@@ -202,33 +202,46 @@ class Downloader:
 
             track_title = None
             track_artist = None
+            
             if metadata is not None:
                 t = metadata[num]
                 track_title = t.title if not t.unused else self.cur_video.title
                 track_artist = t.artist if not t.unused else self.artist
                 track_album = self.album
                 track_image_path = self.image_filepath
+                if t.image_path is not None:
+                    if not is_url(t.image_path):
+                        track_image_path = t.image_path
+                    else:
+                        try:
+                            track_image_path = Downloader.download_image(
+                                self.image_path, num, self.outdir
+                            )
+                            self.to_delete.append(track_image_path)
+                            num = 0  # track num should always be 1 if downloading a single
+                        except error.ImageDownloadError as e:
+                            image_dl_failed = True
+                            failed_image_url = t.image_path
                 if not self.is_album:
                     track_album = t.album
-                    if t.image_path is not None:
-                        if not is_url(t.image_path):
-                            track_image_path = t.image_path
-                        else:
-                            try:
-                                track_image_path = Downloader.download_image(
-                                    t.image_path, num, self.outdir
-                                )
-                                self.to_delete.append(track_image_path)
-                                num = 0  # track num should always be 1 if downloading a single
-                            except error.ImageDownloadError as e:
-                                image_dl_failed = True
-                                failed_image_url = t.image_path
 
             else:
                 track_title = self.cur_video.title
                 track_artist = self.artist
                 track_album = self.album
-                track_image_path = self.image_filepath
+                if self.image_filepath is not None:
+                    if not is_url(self.image_filepath):
+                        track_image_path = self.image_filepath
+                    else:
+                        try:
+                            track_image_path = Downloader.download_image(
+                                self.image_filepath, num, self.outdir
+                            )
+                            self.to_delete.append(track_image_path)
+                            num = 0  # track num should always be 1 if downloading a single
+                        except error.ImageDownloadError as e:
+                            image_dl_failed = True
+                            failed_image_url = self.image_filepath
 
             metadata_branch = "├──" if self.mp3 else "└──"
 
