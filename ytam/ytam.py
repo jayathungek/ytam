@@ -132,6 +132,7 @@ class Downloader:
 
     def download(self):
         metadata = None
+        track_image_path = None
 
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
@@ -238,7 +239,6 @@ class Downloader:
                                 self.image_filepath, num, self.outdir
                             )
                             self.to_delete.append(track_image_path)
-                            num = 0  # track num should always be 1 if downloading a single
                         except error.ImageDownloadError as e:
                             image_dl_failed = True
                             failed_image_url = self.image_filepath
