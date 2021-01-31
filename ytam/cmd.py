@@ -7,10 +7,12 @@ import colorama
 from pytube import Playlist
 
 try:
+    import version
     import error
     import font
     from ytam import Downloader
 except ModuleNotFoundError:
+    import ytam.version as version
     import ytam.error as error
     import ytam.font as font
     from ytam.ytam import Downloader
@@ -108,10 +110,24 @@ def parse_args(args):
         default=False,
         help="checks whether ytam is working as it should by trying to download a pre-defined playlist and setting pre-defined metadata. Setting this argument causes ytam to ignore ALL others",
     )
+    parser.add_argument(
+        "-v",
+        "--version",
+        type=bool,
+        nargs="?",
+        const=True,
+        default=False,
+        help="shows ytam version and exits",
+    )
     return parser.parse_args(args)
 
 
 def main():
+    if "--version" in sys.argv[1:] or "-v" in sys.argv[1:]:
+        print(f"ytam version {version.version}")
+        exit()
+
+
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
         print("Initialising.")
         urls = Playlist(
