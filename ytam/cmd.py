@@ -153,7 +153,7 @@ def main():
         start = 0 if args.start is None else args.start - 1
         end = len(urls) if args.end is None else args.end
         album = playlist_title if args.album is None else args.album
-        directory = "music/" if args.directory is None else args.directory
+        directory = f"music{SEP}" if args.directory is None else args.directory
         artist = "Unknown" if args.artist is None else args.artist
         is_album = False if args.album is None else True
         image = args.image
