@@ -55,11 +55,26 @@ class ImageDownloadError(Error):
         self.message = f"Could not download image at {url}."
 
 
+class WrongMetadataLinkError(Error):
+    def __init__(self, url):
+        self.message = f"The url at {url} does not point to a valid Discogs.com release page."
+
+
+class BrokenDiscogsLinkError(Error):
+    def __init__(self, url):
+        self.message = f"The url at {url} is unavailable."
+
+
+class TracknumberMismatchError(Error):
+    def __init__(self, playlist, album):
+        self.message = f"Mismatch between the number of selected tracks in YouTube playlist {playlist} and Discogs release for {album}."
+
 # bad url
 # url not for playlist
 # title file not found
 # invalid line in title file
 # directory not found
+
 
 if __name__ == "__main__":
     e = ImageDownloadError("jxnjsxsjx")
