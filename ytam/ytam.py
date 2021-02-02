@@ -216,7 +216,7 @@ class Downloader:
                     else:
                         try:
                             track_image_path = Downloader.download_image(
-                                self.image_path, num, self.outdir
+                                t.image_path, num, self.outdir
                             )
                             self.to_delete.append(track_image_path)
                             num = 0  # track num should always be 1 if downloading a single
