@@ -61,7 +61,7 @@ def parse_args(args):
     parser.add_argument(
         "-g",
         "--discogs",
-        help="use discogs.com to automatically set album name, artist, art and all track titles",
+        help="the link to a Discogs.com release page. Automatically sets album name, artist, art and all track titles from Discogs.com",
     )
     parser.add_argument(
         "-s",
