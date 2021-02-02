@@ -223,6 +223,18 @@ class Downloader:
                         except error.ImageDownloadError as e:
                             image_dl_failed = True
                             failed_image_url = t.image_path
+                else:
+                    if self.image_filepath is not None:
+                        try:
+                            track_image_path = Downloader.download_image(
+                                self.image_filepath, num, self.outdir
+                            )
+                            self.to_delete.append(track_image_path)
+                            num = 0  # track num should always be 1 if downloading a single
+                        except error.ImageDownloadError as e:
+                            image_dl_failed = True
+                            failed_image_url = self.image_filepath
+
                 if not self.is_album:
                     track_album = t.album
 

@@ -11,17 +11,19 @@ try:
     import error
     import font
     from ytam import Downloader
+    from discogs import Discogs
 except ModuleNotFoundError:
     import ytam.version as version
     import ytam.error as error
     import ytam.font as font
     from ytam.ytam import Downloader
+    from ytam.discogs import Discogs
 
 
 SEP = "\\" if platform.system() == "Windows" else "/"
 full_path = os.path.realpath(__file__).split(SEP)
 BASE = f"{SEP.join(full_path[:-1])}"
-
+DEFAULT_TITLES = f"{BASE}{SEP}metadata{SEP}title.txt"
 
 def check_positive(value):
     ivalue = int(value)
@@ -55,6 +57,11 @@ def parse_args(args):
         "-d",
         "--directory",
         help="the download directory (defaults to 'music' -  a subdirectory of the current directory)",
+    )
+    parser.add_argument(
+        "-g",
+        "--discogs",
+        help="use discogs.com to automatically set album name, artist, art and all track titles",
     )
     parser.add_argument(
         "-s",
@@ -146,20 +153,14 @@ def main():
         mp3 = True
 
     else:
-        args = parse_args(sys.argv[1:])
         print("Initialising.")
+        args = parse_args(sys.argv[1:])
+        mp3 = args.mp3
         urls = Playlist(args.url)
         playlist_title = urls.title
         start = 0 if args.start is None else args.start - 1
         end = len(urls) if args.end is None else args.end
-        album = playlist_title if args.album is None else args.album
         directory = f"music{SEP}" if args.directory is None else args.directory
-        artist = "Unknown" if args.artist is None else args.artist
-        is_album = False if args.album is None else True
-        image = args.image
-        titles = args.titles
-        mp3 = args.mp3
-
         proxies = None
         if args.proxy is not None:
             proxy_strings = [proxy.strip() for proxy in args.proxy.split(" ")]
@@ -167,6 +168,34 @@ def main():
             for proxy_string in proxy_strings:
                 p = proxy_string.split("-")
                 proxies[p[0]] = p[1]
+        
+        if args.discogs is not None:
+            # do discogs error checks here
+            try:
+                d = Discogs(args.discogs)
+                d.make_file(DEFAULT_TITLES)
+                if (end - start) != d.num_tracks:
+                    raise error.TracknumberMismatchError(playlist_title, d.album) 
+                is_album = True
+                album = d.album
+                artist = d.artist
+                image = d.image
+                titles = DEFAULT_TITLES
+            except (
+                error.WrongMetadataLinkError,
+                error.BrokenDiscogsLinkError,
+                error.TracknumberMismatchError
+            ) as e:
+                print(f"Error: {e.message}")
+                exit()
+
+        else:
+            album = playlist_title if args.album is None else args.album
+            artist = "Unknown" if args.artist is None else args.artist
+            is_album = False if args.album is None else True
+            image = args.image
+            titles = args.titles
+
 
     colorama.init()
     d = None
