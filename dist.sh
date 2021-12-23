@@ -14,5 +14,5 @@ make_setup $1 > setup.py
 make_version $1 > ytam/version.py
 
 rm -rf dist/ build/ ytam.egg-info/
-/home/kavi/anaconda3/bin/python setup.py sdist bdist_wheel
+python setup.py sdist bdist_wheel
 twine upload dist/*
