@@ -1,9 +1,8 @@
-import os
 import sys
 
 import re
 import json
-import urllib.request
+from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 
 try:
@@ -14,35 +13,43 @@ except ModuleNotFoundError:
 ARTIST_TAG = "profile_title"
 ALBUM_TAG = "section_content marketplace_box_buttons_count_1"
 IMAGE_TAG = "image_gallery image_gallery_large"
-
 TRACKLIST_TAG = "playlist"
 TITLE_TAG = "tracklist_track_title"
 
-discogs_url = r"(https?:\/\/)?(www\.)?discogs\.com\/[^\/]+\/release\/.+"
+discogs_url = r"(https?:\/\/)?(www\.)?discogs\.com\/(release|master)\/.+"
 artist_exp = r".+ \(\d+\)$"
 
 discogs_url_pattern = re.compile(discogs_url)
 artist_pattern = re.compile(artist_exp)
 
+
 def clean_artist(artist):
-    #discogs will sometimes have a number after the artist name if they have multiple artists by that name in their database. 
-    #If found, delete the number
+    # discogs will sometimes have a number after the artist name if they have multiple artists by that name in their database.
+    # If found, delete the number
     if artist_pattern.match(artist):
         return " ".join(artist.split(" ")[:-1])
     return artist
 
 
 class Discogs:
+    artist: str
+    image: str
+    album: str
+    tracks: []
+    num_tracks: int
 
     def __init__(self, discogs_release_url):
         if not discogs_url_pattern.match(discogs_release_url):
             raise error.WrongMetadataLinkError(discogs_release_url)
 
         try:
-            fp = urllib.request.urlopen(discogs_release_url)
+            req = Request(discogs_release_url)
+            req.add_header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36")
+            fp = urlopen(req)
             html_bytes = fp.read()
             fp.close()
-        except:
+        except Exception as err:
+            print(err)
             raise error.BrokenDiscogsLinkError(discogs_release_url)
 
         html_str = html_bytes.decode("utf8")
@@ -51,7 +58,6 @@ class Discogs:
         self.extract_artist_album()
         self.extract_tracklist()
 
-
     def extract_image(self):
         image_json = self.html.find('div', class_=IMAGE_TAG)['data-images']
         images = json.loads(image_json)
@@ -59,7 +65,7 @@ class Discogs:
         self.image = highest_res
 
     def extract_artist_album(self):
-        art_alb = self.html.find('h1', id=ARTIST_TAG) 
+        art_alb = self.html.find('h1', id=ARTIST_TAG)
         self.artist = clean_artist(art_alb.find('a').contents[0])
         self.album = art_alb.find_all('span')[-1].contents[0].strip()
 
@@ -78,11 +84,7 @@ class Discogs:
             num = 1
             for track in self.tracks:
                 fh.write(f"{track}" if num == 1 else f"\n{track}")
-                num+=1
-
-
-
-
+                num += 1
 
 
 if __name__ == "__main__":
