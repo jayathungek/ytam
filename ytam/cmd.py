@@ -25,6 +25,7 @@ full_path = os.path.realpath(__file__).split(SEP)
 BASE = f"{SEP.join(full_path[:-1])}"
 DEFAULT_TITLES = f"{BASE}{SEP}metadata{SEP}title.txt"
 
+
 def check_positive(value):
     ivalue = int(value)
     if ivalue <= 0:
@@ -151,6 +152,7 @@ def main():
         image = f"{BASE}{SEP}check{SEP}check.jpg"
         titles = f"{BASE}{SEP}check{SEP}check.txt"
         mp3 = True
+        keep_images = True
 
     else:
         print("Initialising.")
@@ -162,6 +164,7 @@ def main():
         end = len(urls) if args.end is None else args.end
         directory = f"music{SEP}" if args.directory is None else args.directory
         proxies = None
+        keep_images = False
         if args.proxy is not None:
             proxy_strings = [proxy.strip() for proxy in args.proxy.split(" ")]
             proxies = {}
@@ -224,6 +227,7 @@ def main():
             is_album,
             titles,
             image,
+            keep_images,
             proxies,
             mp3,
         )
