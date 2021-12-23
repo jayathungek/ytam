@@ -1,1 +1,3 @@
-version = "0.4.1"
+import pkg_resources
+
+version = pkg_resources.require("ytam")[0].version

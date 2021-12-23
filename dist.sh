@@ -11,7 +11,6 @@ function make_version(){
 }
 
 make_setup $1 > setup.py
-make_version $1 > ytam/version.py
 
 rm -rf dist/ build/ ytam.egg-info/
 python setup.py sdist bdist_wheel
