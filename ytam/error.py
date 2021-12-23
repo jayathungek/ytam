@@ -1,5 +1,6 @@
 class Error(Exception):
     """Base class for exceptions in this module."""
+    message: str
 
     def __str__(self):
         return self.message
@@ -57,7 +58,9 @@ class ImageDownloadError(Error):
 
 class WrongMetadataLinkError(Error):
     def __init__(self, url):
-        self.message = f"The url at {url} does not point to a valid Discogs.com release page."
+        self.message = (
+            f"The url at {url} does not point to a valid Discogs.com release page."
+        )
 
 
 class BrokenDiscogsLinkError(Error):
@@ -67,7 +70,9 @@ class BrokenDiscogsLinkError(Error):
 
 class TracknumberMismatchError(Error):
     def __init__(self, playlist, album):
-        self.message = f"Mismatch between the number of selected tracks in YouTube playlist {playlist} and Discogs release for {album}."
+        self.message = f"Mismatch between the number of selected tracks in YouTube playlist {playlist} " \
+                       f"and Discogs release for {album}."
+
 
 # bad url
 # url not for playlist

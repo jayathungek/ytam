@@ -3,7 +3,7 @@ import re
 import requests
 import asyncio
 
-from pytube import YouTube, Playlist
+from pytube import YouTube
 from mutagen.mp4 import MP4, MP4Cover
 
 from ffmpeg import FFmpeg
@@ -92,22 +92,24 @@ class Downloader:
         self.proxies = proxies
         self.mp3 = mp3
 
-    def progress_function(self, chunk, file_handle, bytes_remaining):
+    def progress_function(self, chunk, chunk_size, bytes_remaining):
         title = self.cur_video.title
         size = self.cur_video.filesize
         p = ((size - bytes_remaining) * 100.0) / size
         progress = (
             f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} - [{p:.2f}%]"
             if p < 100
-            else f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} - {font.apply('bl', '[Done]          ')}"
+            else f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} -"
+                 f" {font.apply('bl', '[Done]          ')}"
         )
 
         end = "\n" if p == 100 else "\r"
 
         print(progress, end=end, flush=True)
 
+    @staticmethod
     def apply_metadata(
-        self, track_num, total, path, album, title, artist, image_filename
+        track_num, total, path, album, title, artist, image_filename
     ):
         song = MP4(path)
         song["\xa9alb"] = album
@@ -128,7 +130,7 @@ class Downloader:
             raise error.ImageDownloadError(url)
 
         filename = outdir + f"album_art_{str(index)}.jpg"
-        with open(filename, "wb",) as f:
+        with open(filename, "wb") as f:
             f.write(thumbnail_image.content)
         return filename
 
@@ -162,11 +164,11 @@ class Downloader:
             except Exception as e:
                 self.retry_urls.append((num, url))
                 print(
-                    f"Downloading song {font.apply('gb', str(self.cur_song))} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
+                    f"Downloading song {font.apply('gb', str(self.cur_song))} - "
+                    f"{font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
                 )
                 continue
 
-            path = None
             try:
                 yt.register_on_progress_callback(self.progress_function)
                 self.cur_video = (
@@ -178,34 +180,20 @@ class Downloader:
 
                 safe_name = extract_title(make_safe_filename(self.cur_video.title))
                 path = self.cur_video.download(
-                    output_path=self.outdir, filename=f"{safe_name}.mp4",
+                    output_path=self.outdir, filename=f"{safe_name}.mp4"
                 )
                 self.successful_filepaths.append(path)
                 self.successful += 1
             except (Exception, KeyboardInterrupt) as e:
                 self.retry_urls.append((num, url))
                 print(
-                    f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
+                    f"Downloading song "
+                    f"{font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} "
+                    f"- {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
                 )
 
                 continue
-            # if self.is_album:
-            #     if self.image_filepath is None:
-            #         if not self.album_image_set:
-            #             image_path = Downloader.download_image(
-            #                 yt.thumbnail_url, num, self.outdir
-            #             )
-            #             self.images.append(image_path)
-            #             self.image_filepath = image_path
-            #             self.album_image_set = True
-            # else:
-            #     image_path = Downloader.download_image(yt.thumbnail_url, num, self.outdir)
-            #     self.images.append(image_path)
-            #     self.image_filepath = image_path
 
-            track_title = None
-            track_artist = None
-            
             if metadata is not None:
                 t = metadata[num]
                 track_title = t.title if not t.unused else self.cur_video.title
@@ -222,8 +210,10 @@ class Downloader:
                             )
                             if not self.keep_images:
                                 self.to_delete.append(track_image_path)
-                            num = 0  # track num should always be 1 if downloading a single
-                        except error.ImageDownloadError as e:
+                            num = (
+                                0
+                            )  # track num should always be 1 if downloading a single
+                        except error.ImageDownloadError:
                             image_dl_failed = True
                             failed_image_url = t.image_path
                 else:
@@ -237,8 +227,10 @@ class Downloader:
                                 track_image_path = self.image_filepath
                             if not self.keep_images:
                                 self.to_delete.append(track_image_path)
-                            num = 0  # track num should always be 1 if downloading a single
-                        except error.ImageDownloadError as e:
+                            num = (
+                                0
+                            )  # track num should always be 1 if downloading a single
+                        except error.ImageDownloadError:
                             image_dl_failed = True
                             failed_image_url = self.image_filepath
 
@@ -259,7 +251,7 @@ class Downloader:
                             )
                             if not self.keep_images:
                                 self.to_delete.append(track_image_path)
-                        except error.ImageDownloadError as e:
+                        except error.ImageDownloadError:
                             image_dl_failed = True
                             failed_image_url = self.image_filepath
 
@@ -284,7 +276,8 @@ class Downloader:
 
             except (Exception, KeyboardInterrupt) as e:
                 print(
-                    f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}"
+                    f"{metadata_branch} Applying metadata - {font.apply('bf', '[Failed - ')} "
+                    f"{font.apply('bf', str(e) + ']')}"
                 )
 
             if self.mp3:
@@ -304,9 +297,7 @@ class Downloader:
 
                 try:
                     loop.run_until_complete(ffmpeg.execute())
-
                     os.remove(f"{extract_title(path)}.mp4")
-                    path = f"{extract_title(path)}.mp3"
 
                 except (Exception, KeyboardInterrupt) as e:
                     print(
@@ -325,5 +316,6 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    test = "https://img.discogs.com/jlQ8QxrOHhz1Jn0oxJFHWS1V69c=/fit-in/355x355/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-15034497-1585801110-9244.jpeg.jpg"
+    test = "https://img.discogs.com/jlQ8QxrOHhz1Jn0oxJFHWS1V69c=/fit-in/355x355/filters:strip_icc():format(jpeg):" \
+           "mode_rgb():quality(90)/discogs-images/R-15034497-1585801110-9244.jpeg.jpg"
     print(is_url(test))

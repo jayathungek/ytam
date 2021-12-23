@@ -52,7 +52,10 @@ def parse_args(args):
     parser.add_argument(
         "-t",
         "--titles",
-        help="a plain text file containing the desired titles and artists of the songs in the playlist, each on a new line. Format: title<@>artist. Note: if the --album flag is not set, each entry in this file is treated as a single with its own title, artist, album and cover art. In this case, title, artist and album are mandatory and cover art is optional. Format: title<@>artist<@>album[<@>local path or url to image]",
+        help="a plain text file containing the desired titles and artists of the songs in the playlist, each on a new "
+             "line. Format: title<@>artist. Note: if the --album flag is not set, each entry in this file is treated "
+             "as a single with its own title, artist, album and cover art. In this case, title, artist and album are "
+             "mandatory and cover art is optional. Format: title<@>artist<@>album[<@>local path or url to image]",
     )
     parser.add_argument(
         "-d",
@@ -62,7 +65,8 @@ def parse_args(args):
     parser.add_argument(
         "-g",
         "--discogs",
-        help="the link to a Discogs.com release page. Automatically sets album name, artist, art and all track titles from Discogs.com",
+        help="the link to a Discogs.com release page. Automatically sets album name, artist, art and all track"
+             " titles from Discogs.com",
     )
     parser.add_argument(
         "-s",
@@ -98,7 +102,8 @@ def parse_args(args):
         "-p",
         "--proxy",
         type=str,
-        help="list of proxies to use. Must be enclosed in string quotes with a space separating each proxy. Proxy format: <protocol>-<proxy>",
+        help="list of proxies to use. Must be enclosed in string quotes with a space separating each proxy. "
+             "Proxy format: <protocol>-<proxy>",
     )
     parser.add_argument(
         "-3",
@@ -107,7 +112,8 @@ def parse_args(args):
         nargs="?",
         const=True,
         default=False,
-        help="converts downloaded files to mp3 format and deletes original mp4 file. Requires ffmpeg to be installed on your machine",
+        help="converts downloaded files to mp3 format and deletes original mp4 file. Requires ffmpeg to be installed "
+             "on your machine",
     )
     parser.add_argument(
         "-k",
@@ -116,7 +122,8 @@ def parse_args(args):
         nargs="?",
         const=True,
         default=False,
-        help="checks whether ytam is working as it should by trying to download a pre-defined playlist and setting pre-defined metadata. Setting this argument causes ytam to ignore ALL others",
+        help="checks whether ytam is working as it should by trying to download a pre-defined playlist and setting "
+             "pre-defined metadata. Setting this argument causes ytam to ignore ALL others",
     )
     parser.add_argument(
         "-v",
@@ -134,7 +141,6 @@ def main():
     if "--version" in sys.argv[1:] or "-v" in sys.argv[1:]:
         print(f"ytam version {version.version}")
         exit()
-
 
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
         print("Initialising.")
@@ -171,14 +177,14 @@ def main():
             for proxy_string in proxy_strings:
                 p = proxy_string.split("-")
                 proxies[p[0]] = p[1]
-        
+
         if args.discogs is not None:
             # do discogs error checks here
             try:
                 d = Discogs(args.discogs)
                 d.make_file(DEFAULT_TITLES)
                 if (end - start) != d.num_tracks:
-                    raise error.TracknumberMismatchError(playlist_title, d.album) 
+                    raise error.TracknumberMismatchError(playlist_title, d.album)
                 is_album = True
                 album = d.album
                 artist = d.artist
@@ -187,7 +193,7 @@ def main():
             except (
                 error.WrongMetadataLinkError,
                 error.BrokenDiscogsLinkError,
-                error.TracknumberMismatchError
+                error.TracknumberMismatchError,
             ) as e:
                 print(f"Error: {e.message}")
                 exit()
@@ -199,16 +205,15 @@ def main():
             image = args.image
             titles = args.titles
 
-
     colorama.init()
-    d = None
     try:
         if start >= len(urls):
             raise error.InvalidPlaylistIndexError(start, playlist_title)
         if end < start:
             raise error.IndicesOutOfOrderError()
 
-        downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from playlist {font.apply('gb', playlist_title)}"
+        downloading_message = f"Downloading songs {font.apply('gb', start+1)} - {font.apply('gb', end)} from " \
+                              f"playlist {font.apply('gb', playlist_title)}"
         text_len = (
             len("Downloading songs ")
             + len(str(start))

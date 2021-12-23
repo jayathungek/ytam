@@ -24,8 +24,9 @@ artist_pattern = re.compile(artist_exp)
 
 
 def clean_artist(artist):
-    # discogs will sometimes have a number after the artist name if they have multiple artists by that name in their database.
-    # If found, delete the number
+    # discogs will sometimes have a number after the artist name if they have multiple artists by that name in their
+    # database. If found, delete the number
+
     if artist_pattern.match(artist):
         return " ".join(artist.split(" ")[:-1])
     return artist
@@ -44,7 +45,11 @@ class Discogs:
 
         try:
             req = Request(discogs_release_url)
-            req.add_header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36")
+            req.add_header(
+                "User-Agent",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/50.0.2661.102 Safari/537.36",
+            )
             fp = urlopen(req)
             html_bytes = fp.read()
             fp.close()
@@ -59,28 +64,28 @@ class Discogs:
         self.extract_tracklist()
 
     def extract_image(self):
-        image_json = self.html.find('div', class_=IMAGE_TAG)['data-images']
+        image_json = self.html.find("div", class_=IMAGE_TAG)["data-images"]
         images = json.loads(image_json)
         highest_res = images[0]["full"]
         self.image = highest_res
 
     def extract_artist_album(self):
-        art_alb = self.html.find('h1', id=ARTIST_TAG)
-        self.artist = clean_artist(art_alb.find('a').contents[0])
-        self.album = art_alb.find_all('span')[-1].contents[0].strip()
+        art_alb = self.html.find("h1", id=ARTIST_TAG)
+        self.artist = clean_artist(art_alb.find("a").contents[0])
+        self.album = art_alb.find_all("span")[-1].contents[0].strip()
 
     def extract_tracklist(self):
-        table = self.html.find('table', class_=TRACKLIST_TAG).find_all('tr')
+        table = self.html.find("table", class_=TRACKLIST_TAG).find_all("tr")
         titles = []
         for track in table:
-            title = track.find('span', class_=TITLE_TAG).contents[0]
+            title = track.find("span", class_=TITLE_TAG).contents[0]
             titles.append(title)
 
         self.tracks = titles
         self.num_tracks = len(self.tracks)
 
     def make_file(self, path):
-        with open(path, 'w') as fh:
+        with open(path, "w") as fh:
             num = 1
             for track in self.tracks:
                 fh.write(f"{track}" if num == 1 else f"\n{track}")
