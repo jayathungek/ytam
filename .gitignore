@@ -11,6 +11,4 @@ __pycache__/
 gui/
 dist/
 build/
-ytam.egg-info/
-dist.sh
-setup.py
+ytam.egg-info
