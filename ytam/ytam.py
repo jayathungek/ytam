@@ -75,6 +75,7 @@ class Downloader:
         is_album,
         metadata,
         image_filepath,
+        keep_images,
         proxies,
         mp3,
     ):
@@ -86,6 +87,7 @@ class Downloader:
         self.artist = artist
         self.metadata_filepath = metadata
         self.image_filepath = image_filepath
+        self.keep_images = keep_images
         self.images = []
         self.proxies = proxies
         self.mp3 = mp3
@@ -122,7 +124,7 @@ class Downloader:
     @staticmethod
     def download_image(url, index, outdir):
         thumbnail_image = requests.get(url)
-        if thumbnail_image.content == b"":
+        if len(thumbnail_image.content) == 0:
             raise error.ImageDownloadError(url)
 
         filename = outdir + f"album_art_{str(index)}.jpg"
@@ -176,7 +178,7 @@ class Downloader:
 
                 safe_name = extract_title(make_safe_filename(self.cur_video.title))
                 path = self.cur_video.download(
-                    output_path=self.outdir, filename=safe_name,
+                    output_path=self.outdir, filename=f"{safe_name}.mp4",
                 )
                 self.successful_filepaths.append(path)
                 self.successful += 1
@@ -218,7 +220,8 @@ class Downloader:
                             track_image_path = Downloader.download_image(
                                 t.image_path, num, self.outdir
                             )
-                            self.to_delete.append(track_image_path)
+                            if not self.keep_images:
+                                self.to_delete.append(track_image_path)
                             num = 0  # track num should always be 1 if downloading a single
                         except error.ImageDownloadError as e:
                             image_dl_failed = True
@@ -226,10 +229,14 @@ class Downloader:
                 else:
                     if self.image_filepath is not None:
                         try:
-                            track_image_path = Downloader.download_image(
-                                self.image_filepath, num, self.outdir
-                            )
-                            self.to_delete.append(track_image_path)
+                            if is_url(self.image_filepath):
+                                track_image_path = Downloader.download_image(
+                                    self.image_filepath, num, self.outdir
+                                )
+                            else:
+                                track_image_path = self.image_filepath
+                            if not self.keep_images:
+                                self.to_delete.append(track_image_path)
                             num = 0  # track num should always be 1 if downloading a single
                         except error.ImageDownloadError as e:
                             image_dl_failed = True
@@ -250,7 +257,8 @@ class Downloader:
                             track_image_path = Downloader.download_image(
                                 self.image_filepath, num, self.outdir
                             )
-                            self.to_delete.append(track_image_path)
+                            if not self.keep_images:
+                                self.to_delete.append(track_image_path)
                         except error.ImageDownloadError as e:
                             image_dl_failed = True
                             failed_image_url = self.image_filepath
