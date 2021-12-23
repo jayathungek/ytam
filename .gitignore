@@ -4,6 +4,7 @@
 *.sublime-workspace
 *.pyc
 *TOKEN
+.idea
 videos.txt
 titles.txt
 __pycache__/
