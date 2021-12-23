@@ -31,6 +31,5 @@ setuptools.setup(
         "requests",
         "urllib3",
         "python-ffmpeg",
-        "pytube"
     ],
 )
