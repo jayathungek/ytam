@@ -143,7 +143,6 @@ def main():
         exit()
 
     if "--check" in sys.argv[1:] or "-k" in sys.argv[1:]:
-        print("Initialising.")
         urls = Playlist(
             "https://www.youtube.com/playlist?list=PLOoPqX_q5JAVPMhHjYxcUc2bxTDMyGE-a"
         )
@@ -161,7 +160,6 @@ def main():
         keep_images = True
 
     else:
-        print("Initialising.")
         args = parse_args(sys.argv[1:])
         mp3 = args.mp3
         urls = Playlist(args.url)
