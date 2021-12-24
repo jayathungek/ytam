@@ -17,7 +17,6 @@ except ModuleNotFoundError:
     import ytam.font as font
     from ytam.title import TitleGenerator
 
-
 URL_EXP = r"(https?://)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
 URL_PATTERN = re.compile(URL_EXP)
 
@@ -66,18 +65,18 @@ class Downloader:
     start = None
 
     def __init__(
-        self,
-        urls,
-        total_songs,
-        album,
-        outdir,
-        artist,
-        is_album,
-        metadata,
-        image_filepath,
-        keep_images,
-        proxies,
-        mp3,
+            self,
+            urls,
+            total_songs,
+            album,
+            outdir,
+            artist,
+            is_album,
+            metadata,
+            image_filepath,
+            keep_images,
+            proxies,
+            mp3,
     ):
         self.urls = urls
         self.total_songs = total_songs
@@ -97,9 +96,9 @@ class Downloader:
         size = self.cur_video.filesize
         p = ((size - bytes_remaining) * 100.0) / size
         progress = (
-            f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} - [{p:.2f}%]"
+            f"Downloading song {font.apply('gb', str(self.cur_song)) + ' - ' + font.apply('gb', title)} - [{p:.2f}%]"
             if p < 100
-            else f"Downloading song {font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', title)} -"
+            else f"Downloading song {font.apply('gb', str(self.cur_song)) + ' - ' + font.apply('gb', title)} -"
                  f" {font.apply('bl', '[Done]          ')}"
         )
 
@@ -109,7 +108,7 @@ class Downloader:
 
     @staticmethod
     def apply_metadata(
-        track_num, total, path, album, title, artist, image_filename
+            track_num, total, path, album, title, artist, image_filename
     ):
         song = MP4(path)
         song["\xa9alb"] = album
@@ -173,9 +172,9 @@ class Downloader:
                 yt.register_on_progress_callback(self.progress_function)
                 self.cur_video = (
                     yt.streams.filter(type="audio", subtype="mp4")
-                    .order_by("abr")
-                    .desc()
-                    .first()
+                        .order_by("abr")
+                        .desc()
+                        .first()
                 )
 
                 safe_name = extract_title(make_safe_filename(self.cur_video.title))
@@ -188,7 +187,7 @@ class Downloader:
                 self.retry_urls.append((num, url))
                 print(
                     f"Downloading song "
-                    f"{font.apply('gb',str(self.cur_song))+' - '+font.apply('gb', self.cur_video.title)} "
+                    f"{font.apply('gb', str(self.cur_song)) + ' - ' + font.apply('gb', self.cur_video.title)} "
                     f"- {font.apply('bf', '[Failed - ')} {font.apply('bf', str(e) + ']')}\n"
                 )
 
@@ -210,9 +209,6 @@ class Downloader:
                             )
                             if not self.keep_images:
                                 self.to_delete.append(track_image_path)
-                            num = (
-                                0
-                            )  # track num should always be 1 if downloading a single
                         except error.ImageDownloadError:
                             image_dl_failed = True
                             failed_image_url = t.image_path
@@ -227,9 +223,6 @@ class Downloader:
                                 track_image_path = self.image_filepath
                             if not self.keep_images:
                                 self.to_delete.append(track_image_path)
-                            num = (
-                                0
-                            )  # track num should always be 1 if downloading a single
                         except error.ImageDownloadError:
                             image_dl_failed = True
                             failed_image_url = self.image_filepath
