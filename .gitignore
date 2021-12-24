@@ -12,3 +12,5 @@ gui/
 dist/
 build/
 ytam.egg-info
+ytam/metadata
+!ytam/metadata/__init__.py
