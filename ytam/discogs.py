@@ -53,8 +53,7 @@ class Discogs:
             fp = urlopen(req)
             html_bytes = fp.read()
             fp.close()
-        except Exception as err:
-            print(err)
+        except Exception:
             raise error.BrokenDiscogsLinkError(discogs_release_url)
 
         html_str = html_bytes.decode("utf8")
@@ -64,25 +63,35 @@ class Discogs:
         self.extract_tracklist()
 
     def extract_image(self):
-        image_json = self.html.find("div", class_=IMAGE_TAG)["data-images"]
-        images = json.loads(image_json)
-        highest_res = images[0]["full"]
-        self.image = highest_res
+        image_json = self.html.find("div", class_=IMAGE_TAG)
+        if image_json:
+            image_json = image_json["data-images"]
+            images = json.loads(image_json)
+            highest_res = images[0]["full"]
+            self.image = highest_res
+        else:
+            raise error.AlbumArtNotFoundError()
 
     def extract_artist_album(self):
         art_alb = self.html.find("h1", id=ARTIST_TAG)
-        self.artist = clean_artist(art_alb.find("a").contents[0])
-        self.album = art_alb.find_all("span")[-1].contents[0].strip()
+        if art_alb:
+            self.artist = clean_artist(art_alb.find("a").contents[0])
+            self.album = art_alb.find_all("span")[-1].contents[0].strip()
+        else:
+            raise error.AlbumArtistNotFoundError()
 
     def extract_tracklist(self):
         table = self.html.find("table", class_=TRACKLIST_TAG).find_all("tr")
-        titles = []
-        for track in table:
-            title = track.find("span", class_=TITLE_TAG).contents[0]
-            titles.append(title)
+        if table:
+            titles = []
+            for track in table:
+                title = track.find("span", class_=TITLE_TAG).contents[0]
+                titles.append(title)
 
-        self.tracks = titles
-        self.num_tracks = len(self.tracks)
+            self.tracks = titles
+            self.num_tracks = len(self.tracks)
+        else:
+            raise error.AlbumTracklistNotFoundError()
 
     def make_file(self, path):
         with open(path, "w") as fh:

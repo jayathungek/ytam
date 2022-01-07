@@ -74,6 +74,22 @@ class TracknumberMismatchError(Error):
                        f"and Discogs release for {album}."
 
 
+class AlbumArtNotFoundError(Error):
+    def __init__(self):
+        self.message = f"Album art could not be found."
+
+
+class AlbumArtistNotFoundError(Error):
+    def __init__(self):
+        self.message = f"Album artist and name could not be found."
+
+
+class AlbumTracklistNotFoundError(Error):
+    def __init__(self):
+        self.message = f"Album tracklist could not be found."
+
+
+
 # bad url
 # url not for playlist
 # title file not found

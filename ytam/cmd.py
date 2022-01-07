@@ -192,6 +192,9 @@ def main():
                 error.WrongMetadataLinkError,
                 error.BrokenDiscogsLinkError,
                 error.TracknumberMismatchError,
+                error.AlbumArtNotFoundError,
+                error.AlbumArtistNotFoundError,
+                error.AlbumTracklistNotFoundError
             ) as e:
                 print(f"Error: {e.message}")
                 exit()
